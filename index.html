@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Love Notes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="gate" class="gate">
+    <h1>Enter password 💌</h1>
+    <input id="pw" type="password" placeholder="Password" />
+    <button id="enterBtn">Enter</button>
+    <p id="gateMsg" class="muted"></p>
+  </div>
+
+  <main id="app" class="hidden">
+    <h2>Click the jar</h2>
+    <button id="jar" class="jar" aria-label="Open jar">🫙</button>
+
+    <div id="papers" class="papers"></div>
+
+    <div id="modal" class="modal hidden">
+      <div class="card">
+        <button id="closeModal" class="close">✕</button>
+        <div id="modalText" class="modalText"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
