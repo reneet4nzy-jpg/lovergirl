@@ -1,9 +1,7 @@
-// NOTE: Front-end "passwords" are not truly secure on static sites.
-// For casual privacy, this is fine.
+// ===== PASSWORD =====
 const PASSWORD = "yourconstellationnowandforever";
 
-let lastOpenedPaper = null;
-
+// ===== MESSAGES (sample 100) =====
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
@@ -100,12 +98,13 @@ const messages = [
   "I love how you care for me.",
   "You are my anchor.",
   "You make my world make sense.",
-  "youre stinky becaus how we are together.",
+  "I love how we are together.",
   "You are my quiet happiness.",
   "You make love feel effortless.",
   "You are my constellation now and forever."
 ];
 
+// ===== DOM =====
 const gate = document.getElementById("gate");
 const app = document.getElementById("app");
 const pw = document.getElementById("pw");
@@ -119,12 +118,19 @@ const modal = document.getElementById("modal");
 const modalText = document.getElementById("modalText");
 const closeModal = document.getElementById("closeModal");
 
+// 🔥 FORCE modal hidden on load (fix)
+modal.classList.add("hidden");
+
+let lastOpenedPaper = null;
+let spilled = false;
+
+// ===== PASSWORD LOGIC =====
 enterBtn.addEventListener("click", () => {
   if (pw.value === PASSWORD) {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "Typo perhaps? insert sad hampter";
+    gateMsg.textContent = "typo perhaps? insert sad hampter";
   }
 });
 
@@ -132,8 +138,7 @@ pw.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enterBtn.click();
 });
 
-let spilled = false;
-
+// ===== JAR CLICK =====
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
@@ -141,40 +146,36 @@ jar.addEventListener("click", () => {
   spillPapers();
 });
 
+// ===== SPILL =====
 function spillPapers() {
   const W = papersWrap.clientWidth;
   const H = papersWrap.clientHeight;
 
-  // Shuffle messages and use up to 100
   const pool = [...messages].sort(() => Math.random() - 0.5);
-  const count = Math.min(100, pool.length);
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < pool.length; i++) {
+    const msg = pool[i];
+    const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
+
     const p = document.createElement("div");
     p.className = "paper";
-const msg = pool[i];
-const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
-
-p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
+    p.innerHTML = `<div class="preview">${preview}</div>`;
 
     const startX = W * 0.5;
     const startY = 30;
 
-    const endX = rand(20, W - 60);
-    const endY = rand(70, H - 50);
+    const endX = Math.random() * (W - 100);
+    const endY = 80 + Math.random() * (H - 120);
+    const rot = Math.floor(Math.random() * 80 - 40);
 
-    const rot = rand(-40, 40);
     p.style.setProperty("--rot", rot + "deg");
-
     p.style.left = startX + "px";
     p.style.top = startY + "px";
     p.style.opacity = 0;
 
     p.addEventListener("click", () => openMessage(msg, p));
-
     papersWrap.appendChild(p);
 
-    // simple "spill" animation
     requestAnimationFrame(() => {
       p.style.opacity = 1;
       p.animate(
@@ -182,44 +183,34 @@ p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
           { transform: `translate(0,0) rotate(${rot}deg)` },
           { transform: `translate(${endX - startX}px, ${endY - startY}px) rotate(${rot}deg)` }
         ],
-        { duration: rand(500, 1200), easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" }
+        { duration: 800, easing: "ease-out", fill: "forwards" }
       );
     });
   }
 }
 
+// ===== OPEN MESSAGE =====
 function openMessage(text, paperEl) {
-  lastOpenedPaper = paperEl;   // remember which paper was clicked
+  if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
+    lastOpenedPaper.classList.remove("opened");
+  }
+
+  lastOpenedPaper = paperEl;
   paperEl.classList.add("opened");
+  paperEl.style.opacity = 0.6;
 
   modalText.textContent = text;
   modal.classList.remove("hidden");
-
-  paperEl.style.opacity = 0.6;
 }
 
-closeModal.addEventListener("click", () => {
-  modal.classList.add("hidden");
-  if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
-});
+// ===== CLOSE MODAL =====
+closeModal.addEventListener("click", closeModalFn);
 
 modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.classList.add("hidden");
-    if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
-  }
+  if (e.target === modal) closeModalFn();
 });
 
-function rand(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, (c) => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[c]));
+function closeModalFn() {
+  modal.classList.add("hidden");
+  if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
 }
