@@ -36,7 +36,6 @@ main{
   padding:10px 12px;
   border-radius:10px;
   border:1px solid #ddd;
-  outline:none;
 }
 
 .gate button{
@@ -85,7 +84,6 @@ main{
 
 /* ================================================= */
 /* TORN PARCHMENT NOTES                             */
-/* (uses parchment.png you upload)                  */
 /* ================================================= */
 
 .paper{
@@ -100,7 +98,6 @@ main{
   background-position: center;
   background-repeat: no-repeat;
 
-  /* make the transparent torn edges pop */
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.20));
   transform: rotate(var(--rot, 0deg));
   transition: transform .18s ease, opacity .25s ease, filter .18s ease;
@@ -112,10 +109,10 @@ main{
 }
 
 .paper .preview{
-  padding:16px 14px 14px;
+  padding:18px 16px;
   font-family: "Times New Roman", Times, serif;
-  font-size:13px;
-  line-height:1.15;
+  font-size:14px;
+  line-height:1.2;
   font-style: italic;
   color: rgba(45, 25, 10, .92);
 
@@ -124,17 +121,30 @@ main{
   -webkit-box-orient:vertical;
   overflow:hidden;
 
-  text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  text-align:center;
 }
 
-/* opened look */
 .paper.opened{
   transform: rotate(0deg) scale(1.12);
   z-index: 5;
 }
 
 /* ================================================= */
-/* PARCHMENT LETTER (Centered Text + Proper X)      */
+/* MODAL BACKDROP (CENTERED & ABOVE EVERYTHING)     */
+/* ================================================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  z-index:9999;
+}
+
+/* ================================================= */
+/* PARCHMENT LETTER (CENTERED)                      */
 /* ================================================= */
 
 .card{
@@ -146,7 +156,7 @@ main{
   align-items:center;
   justify-content:center;
 
-  padding:80px 80px;
+  padding:80px;
 
   background-image: url("parchment.png");
   background-size: 100% 100%;
@@ -176,20 +186,17 @@ main{
   color: rgba(45, 25, 10, .94);
   max-width: 70%;
   white-space:pre-wrap;
-  text-shadow: 0 1px 0 rgba(255,255,255,.35);
 }
 
-/* X button positioned on parchment */
+/* CLOSE BUTTON ON PAPER */
 .close{
   position:absolute;
   top:40px;
   right:50px;
-
   border:none;
   background:transparent;
-  font-size:20px;
+  font-size:22px;
   font-weight:bold;
   cursor:pointer;
-
   color: rgba(60,40,20,.9);
 }
