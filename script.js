@@ -2,6 +2,8 @@
 // For casual privacy, this is fine.
 const PASSWORD = "yourconstellationnowandforever";
 
+let lastOpenedPaper = null;
+
 const messages = [
   "Message 1: I love you.",
   "Message 2: You’re my favourite person.",
@@ -27,7 +29,7 @@ enterBtn.addEventListener("click", () => {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "Wrong password 😅";
+    gateMsg.textContent = "Typo perhaps? insert sad hampter";
   }
 });
 
@@ -55,7 +57,10 @@ function spillPapers() {
   for (let i = 0; i < count; i++) {
     const p = document.createElement("div");
     p.className = "paper";
-    p.textContent = "✉️";
+const msg = pool[i];
+const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
+
+p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
 
     const startX = W * 0.5;
     const startY = 30;
@@ -70,7 +75,6 @@ function spillPapers() {
     p.style.top = startY + "px";
     p.style.opacity = 0;
 
-    const msg = pool[i];
     p.addEventListener("click", () => openMessage(msg, p));
 
     papersWrap.appendChild(p);
@@ -90,16 +94,37 @@ function spillPapers() {
 }
 
 function openMessage(text, paperEl) {
+  lastOpenedPaper = paperEl;   // remember which paper was clicked
+  paperEl.classList.add("opened");
+
   modalText.textContent = text;
   modal.classList.remove("hidden");
-  paperEl.style.opacity = 0.45; // mark as opened
+
+  paperEl.style.opacity = 0.6;
 }
 
-closeModal.addEventListener("click", () => modal.classList.add("hidden"));
+closeModal.addEventListener("click", () => {
+  modal.classList.add("hidden");
+  if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
+});
+
 modal.addEventListener("click", (e) => {
-  if (e.target === modal) modal.classList.add("hidden");
+  if (e.target === modal) {
+    modal.classList.add("hidden");
+    if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
+  }
 });
 
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[c]));
 }
