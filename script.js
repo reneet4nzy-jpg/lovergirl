@@ -139,10 +139,15 @@ pw.addEventListener("keydown", (e) => {
 });
 
 // ===== JAR CLICK =====
+const jarTitle = document.getElementById("jarTitle");
+
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
+
   jar.textContent = "🫙✨";
+  jarTitle.style.display = "none";  // 👈 hide text
+
   spillPapers();
 });
 
