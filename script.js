@@ -4,7 +4,10 @@ let spilled = false;
 let lastOpenedPaper = null;
 
 const messages = [
-  "You are my favourite hello and my hardest goodbye.",
+  "You miss me and im not responding
+  
+  Hii babyy im sorry i must be busy for you to be here but scroll around here until im back? 
+  i put little bits of me in all of these so this might as well count as my presence. Enjoy scrolling my love.",
   "I love the way your eyes soften when you smile.",
   "You make ordinary days feel like magic.",
   "Thank you for choosing me.",
