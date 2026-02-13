@@ -28,6 +28,23 @@ const jar = document.getElementById("jar");
 const jarWrap = document.getElementById("jarWrap");
 const jarTitle = document.getElementById("jarTitle");
 
+.openWhenTitle{
+  font-family: "Times New Roman", Times, serif;
+  font-size: 44px;
+  color: #6b0f1a;
+  margin: 0 0 25px 0;
+  text-align: center;
+  font-style: italic;
+  letter-spacing: 1.5px;
+
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.openWhenTitle.show{
+  opacity: 1;
+}
+
 const papersWrap = document.getElementById("papers");
 
 const modal = document.getElementById("modal");
@@ -59,6 +76,13 @@ jar.addEventListener("click", () => {
 
   if (jarTitle) jarTitle.style.display = "none";
   if (jarWrap) jarWrap.classList.add("tipped");
+
+  if (openWhenText) {
+    openWhenText.classList.remove("hidden");
+    setTimeout(() => {
+      openWhenText.classList.add("show");
+    }, 50);
+  }
 
   setTimeout(() => spillPhysicsThenOrganize(), 450);
 });
