@@ -1,16 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Love Notes</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .hidden { display: none !important; }
-  </style>
-</head>
 <body>
-  <div class="frameSafe">
+  <main>
 
     <div id="gate" class="gate">
       <h1>Enter password 💌</h1>
@@ -19,7 +8,7 @@
       <p id="gateMsg" class="muted"></p>
     </div>
 
-    <main id="app" class="hidden">
+    <div id="app" class="hidden">
       <h1 id="openWhenText" class="openWhenTitle hidden">Open when…</h1>
 
       <div class="scene">
@@ -38,9 +27,9 @@
           <div id="modalText" class="modalText"></div>
         </div>
       </div>
-    </main>
+    </div>
 
-  </div>
+  </main>
 
   <script src="script.js"></script>
 </body>
