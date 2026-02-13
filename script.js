@@ -6,16 +6,17 @@ let lastOpenedPaper = null;
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
+  "You need to know how much i love you.\n\nremember that i love you so much that wed be immortalised as constellations after we die because of how much i love you. death shall not do us part."
 
   {
-    preview: "You need a kiss 💋",
+    preview: "You need a kiss",
     text: "You need a kiss.\n\nA little kiss for u.\n\nMwah, I love you.",
     img: "kisses.jpg"
   },
 
   {
-    preview: "If I'm not replying…",
-    text: "U miss me but I’m busy.\n\nHii babyy, I’m sorry. I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling, my love."
+    preview: "If I'm not responding but u miss me…",
+    text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling, my love."
   },
 
   "Your laugh is my favourite sound."
