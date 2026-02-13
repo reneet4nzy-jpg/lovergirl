@@ -1,6 +1,6 @@
-/* ============================= */
-/* PASSWORD SYSTEM               */
-/* ============================= */
+/* ================================= */
+/* PASSWORD SYSTEM                   */
+/* ================================= */
 
 const PASSWORD = "1234";
 
@@ -30,9 +30,9 @@ enterBtn.addEventListener("click", () => {
   }
 });
 
-/* ============================= */
-/* JAR + SPILL ANIMATION        */
-/* ============================= */
+/* ================================= */
+/* JAR + SPILL PHYSICS               */
+/* ================================= */
 
 const jarWrap = document.querySelector(".jarWrap");
 const jar = document.getElementById("jar");
@@ -46,22 +46,23 @@ jar.addEventListener("click", () => {
   hasSpilled = true;
 
   if (jarTitle) jarTitle.style.display = "none";
-
   jarWrap.classList.add("tipped");
 
   setTimeout(() => {
     spillNotes();
-  }, 500);
+  }, 450);
 });
 
 function spillNotes() {
-  const papersRect = papers.getBoundingClientRect();
+  const W = papers.clientWidth;
+  const H = papers.clientHeight;
 
-  messages.forEach((text, i) => {
+  const states = [];
+
+  messages.forEach((text) => {
     const note = document.createElement("div");
     note.className = "paper flying";
 
-    // RANDOM PERMANENT TILT (-8deg to 8deg)
     const randomTilt = (Math.random() * 16 - 8).toFixed(2);
     note.style.setProperty("--rot", `${randomTilt}deg`);
 
@@ -72,52 +73,95 @@ function spillNotes() {
 
     papers.appendChild(note);
 
-    // start from jar area
-    const startX = papersRect.width / 2 - 70;
-    const startY = 40;
+    const startX = W / 2 - 70;
+    const startY = 60;
 
     note.style.setProperty("--tx", `${startX}px`);
     note.style.setProperty("--ty", `${startY}px`);
 
-    // animate downward with slight horizontal drift
-    setTimeout(() => {
-      const drift = (Math.random() * 120 - 60);
-      const drop = 350 + Math.random() * 120;
-
-      note.style.setProperty("--tx", `${startX + drift}px`);
-      note.style.setProperty("--ty", `${drop}px`);
-    }, 50);
+    states.push({
+      el: note,
+      x: startX,
+      y: startY,
+      vx: (Math.random() * 10 - 5),
+      vy: -(Math.random() * 8),
+      tilt: randomTilt
+    });
   });
 
-  // after fall → convert to tray grid
-  setTimeout(() => {
-    papers.classList.add("tray");
-    papers.classList.remove("flying");
+  const gravity = 0.7;
+  const bounce = 0.75;
+  const friction = 0.992;
+  const floor = H - 110;
 
-    const grid = document.createElement("div");
-    grid.className = "papersGrid";
+  let start = null;
+  const duration = 2600;
 
-    const notes = Array.from(document.querySelectorAll(".paper"));
+  function animate(time) {
+    if (!start) start = time;
+    const elapsed = time - start;
 
-    notes.forEach(note => {
-      note.classList.remove("flying");
+    states.forEach(s => {
+      s.vy += gravity;
+      s.x += s.vx;
+      s.y += s.vy;
 
-      // KEEP the same tilt (do not overwrite --rot)
-      note.style.setProperty("--tx", "0px");
-      note.style.setProperty("--ty", "0px");
+      s.vx *= friction;
 
-      grid.appendChild(note);
+      if (s.y > floor) {
+        s.y = floor;
+        s.vy *= -bounce;
+      }
+
+      if (s.x < 0 || s.x > W - 140) {
+        s.vx *= -bounce;
+      }
+
+      s.el.style.setProperty("--tx", `${s.x}px`);
+      s.el.style.setProperty("--ty", `${s.y}px`);
     });
 
-    papers.innerHTML = "";
-    papers.appendChild(grid);
+    if (elapsed < duration) {
+      requestAnimationFrame(animate);
+    } else {
+      settleIntoGrid(states);
+    }
+  }
 
-  }, 900);
+  requestAnimationFrame(animate);
 }
 
-/* ============================= */
-/* MODAL SYSTEM                 */
-/* ============================= */
+/* ================================= */
+/* SMOOTH SETTLE INTO GRID           */
+/* ================================= */
+
+function settleIntoGrid(states) {
+  papers.classList.add("tray");
+
+  const grid = document.createElement("div");
+  grid.className = "papersGrid";
+
+  states.forEach((s, i) => {
+    setTimeout(() => {
+      s.el.classList.remove("flying");
+
+      s.el.style.transition = "all 600ms cubic-bezier(.2,.9,.2,1)";
+      s.el.style.setProperty("--tx", "0px");
+      s.el.style.setProperty("--ty", "0px");
+
+      grid.appendChild(s.el);
+    }, i * 20);
+  });
+
+  setTimeout(() => {
+    papers.innerHTML = "";
+    papers.appendChild(grid);
+  }, 800);
+}
+
+/* ================================= */
+/* MODAL SYSTEM                      */
+/* ================================= */
 
 const modal = document.getElementById("modal");
 const modalText = document.getElementById("modalText");
