@@ -1,11 +1,9 @@
-// NOTE: Front-end passwords aren't truly secure on static sites.
-// For casual privacy, it's fine.
-const PASSWORD = "1234";
+const PASSWORD = "yourconstellationnowandforever";
 
 let spilled = false;
 let lastOpenedPaper = null;
 
-// You can replace these later with your real 100 messages.
+// Replace later with your real 100 messages.
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
@@ -36,24 +34,22 @@ const modal = document.getElementById("modal");
 const modalText = document.getElementById("modalText");
 const closeModal = document.getElementById("closeModal");
 
-// Ensure modal starts hidden even if CSS loads late
 modal.classList.add("hidden");
 
-// Password gate
+// Password
 enterBtn.addEventListener("click", () => {
   if (pw.value === PASSWORD) {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "Typo perchance? insert sad hampter";
+    gateMsg.textContent = "Wrong password 😭";
   }
 });
-
 pw.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enterBtn.click();
 });
 
-// Jar click: hide title, tip jar, then spill
+// Jar click
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
@@ -61,100 +57,107 @@ jar.addEventListener("click", () => {
   if (jarTitle) jarTitle.style.display = "none";
   jarWrap.classList.add("tipped");
 
-  setTimeout(() => spillPapers(true), 500);
+  setTimeout(() => {
+    spillBurstThenArrange();
+  }, 450);
 });
 
-function spillPapers(isTipped = false) {
+function spillBurstThenArrange() {
+  // clear old
+  papersWrap.innerHTML = "";
+
+  // build exactly 100 notes (repeat if needed for demo)
+  const pool = [];
+  while (pool.length < 100) pool.push(...messages);
+  pool.length = 100;
+
+  // jar mouth position inside papers
+  const papersRect = papersWrap.getBoundingClientRect();
+  const jarRect = jarWrap.getBoundingClientRect();
+  const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45; // right side
+  const mouthY = (jarRect.top + jarRect.height / 2) - papersRect.top + 10;
+
   const W = papersWrap.clientWidth;
   const H = papersWrap.clientHeight;
 
-  // Use up to 100 notes (repeat if you have <100 sample msgs)
-  const pool = [];
-  while (pool.length < 100) {
-    pool.push(...messages);
-  }
-  pool.length = 100;
+  const created = [];
 
-  // Where is the jar INSIDE the papers box?
-  const papersRect = papersWrap.getBoundingClientRect();
-  const jarRect = jarWrap.getBoundingClientRect();
-
-  const jarCenterX = (jarRect.left + jarRect.width / 2) - papersRect.left;
-  const jarCenterY = (jarRect.top + jarRect.height / 2) - papersRect.top;
-
-  // Mouth offset: when tipped, pour from the right side of jar
-  const mouthX = isTipped ? jarCenterX + 45 : jarCenterX;
-  const mouthY = isTipped ? jarCenterY + 10 : jarCenterY;
-
-  const PAPER_W = 110;
-  const PAPER_H = 80;
-
+  // quick “burst spill” (short animation)
   for (let i = 0; i < pool.length; i++) {
     const msg = pool[i];
     const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
 
     const p = document.createElement("div");
-    p.className = "paper";
+    p.className = "paper flying";
     p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
 
-    // Anchor at jar mouth
     p.style.left = mouthX + "px";
     p.style.top = mouthY + "px";
-
     p.addEventListener("click", () => openMessage(msg, p));
+
     papersWrap.appendChild(p);
+    created.push(p);
 
-    // Physics-ish
-    let x = 0, y = 0;
-    const rot = rand(-35, 35);
+    const rot = rand(-25, 25);
+    const dx = rand(30, 220);          // pour outward
+    const dy = rand(-30, 140);         // slight up/down
+    const settleY = rand(180, H - 150); // temporary “floor” in box
 
-    // Pour direction:
-    // tipped: mostly right, a bit upward/downward, then gravity takes over
-    let vx = isTipped ? rand(5, 12) : rand(-4, 4);
-    let vy = isTipped ? rand(-3, 3) : rand(2, 6);
-
-    const gravity = 0.55;
-    const friction = 0.985;
-    const bounce = 0.55;
-
-    // keep inside box: clamp relative to mouth position
-    const minX = -mouthX + 10;
-    const maxX = (W - PAPER_W) - mouthX - 10;
-    const minY = -mouthY + 10;
-    const maxY = (H - PAPER_H) - mouthY - 10;
-
-    // Stagger so it feels like a pour
-    const delay = i * 16;
+    const delay = i * 6;
 
     setTimeout(() => {
-      function tick() {
-        // integrate
-        vy += gravity;
-        vx *= friction;
-        vy *= friction;
+      // stage 1: shoot out from mouth
+      p.animate(
+        [
+          { transform: `translate(0px,0px) rotate(${rot}deg)` },
+          { transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)` }
+        ],
+        { duration: 280, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" }
+      );
 
-        x += vx;
-        y += vy;
-
-        // bounce off boundaries
-        if (x < minX) { x = minX; vx *= -0.6; }
-        if (x > maxX) { x = maxX; vx *= -0.6; }
-        if (y < minY) { y = minY; vy *= -0.6; }
-        if (y > maxY) { y = maxY; vy *= -bounce; }
-
-        p.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
-
-        // stop when basically settled
-        const settled = Math.abs(vx) < 0.18 && Math.abs(vy) < 0.25;
-        if (!settled) requestAnimationFrame(tick);
-      }
-
-      requestAnimationFrame(tick);
+      // stage 2: drop down to a random temporary landing (avoids big pile)
+      setTimeout(() => {
+        p.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)` },
+            { transform: `translate(${dx}px, ${settleY}px) rotate(${rot}deg)` }
+          ],
+          { duration: 420, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" }
+        );
+      }, 260);
     }, delay);
   }
+
+  // After burst, switch to tray layout
+  setTimeout(() => {
+    arrangeIntoScrollableGrid(created);
+  }, 1400);
 }
 
-// Modal open/close
+function arrangeIntoScrollableGrid(papers) {
+  // Turn container into scroll tray
+  papersWrap.classList.add("tray");
+
+  // Make a grid wrapper
+  const grid = document.createElement("div");
+  grid.className = "papersGrid";
+
+  // Move notes into grid and remove flying shadow
+  papers.forEach((p) => {
+    p.classList.remove("flying");
+    p.style.opacity = 1;
+    p.style.transform = "";
+    grid.appendChild(p);
+  });
+
+  papersWrap.innerHTML = "";
+  papersWrap.appendChild(grid);
+
+  // Scroll to top neatly
+  papersWrap.scrollTop = 0;
+}
+
+// Modal
 function openMessage(text, paperEl) {
   if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
     lastOpenedPaper.classList.remove("opened");
@@ -163,14 +166,13 @@ function openMessage(text, paperEl) {
 
   lastOpenedPaper = paperEl;
   paperEl.classList.add("opened");
-  paperEl.style.opacity = 0.6;
+  paperEl.style.opacity = 0.85;
 
   modalText.textContent = text;
   modal.classList.remove("hidden");
 }
 
 closeModal.addEventListener("click", closeModalFn);
-
 modal.addEventListener("click", (e) => {
   if (e.target === modal) closeModalFn();
 });
@@ -184,11 +186,10 @@ function closeModalFn() {
   }
 }
 
-// Helpers
+// utils
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, (c) => ({
     "&":"&amp;",
