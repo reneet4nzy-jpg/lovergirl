@@ -67,6 +67,7 @@ function spillPhysicsThenSettle() {
   while (pool.length < 100) pool.push(...messages);
   pool.length = 100;
 
+  // get container size
   const W = papersWrap.clientWidth;
   const H = papersWrap.clientHeight;
 
@@ -76,8 +77,29 @@ function spillPhysicsThenSettle() {
   const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45;
   const mouthY = (jarRect.top + jarRect.height / 2) - papersRect.top + 10;
 
-  const PAPER_W = 140;
-  const PAPER_H = 96;
+  // Create ONE temp paper to measure real size
+  const temp = document.createElement("div");
+  temp.className = "paper";
+  temp.style.left = "0px";
+  temp.style.top = "0px";
+  temp.style.opacity = "0";
+  temp.innerHTML = `<div class="preview">test</div>`;
+  papersWrap.appendChild(temp);
+
+  const PAPER_W = temp.offsetWidth || 140;
+  const PAPER_H = temp.offsetHeight || 96;
+  temp.remove();
+
+  // Physics settings (bouncy!)
+  const gravity = 0.95;
+  const friction = 0.988;
+  const bounce = 0.90;
+
+  // IMPORTANT: floor/ceiling based on REAL paper size
+  const minX = -mouthX + 8;
+  const maxX = (W - PAPER_W) - mouthX - 8;
+  const minY = -mouthY + 8;
+  const maxY = (H - PAPER_H) - mouthY - 8;
 
   const states = [];
 
@@ -88,12 +110,11 @@ function spillPhysicsThenSettle() {
     const el = document.createElement("div");
     el.className = "paper flying";
     el.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
-
-    // anchor at the jar mouth
     el.style.left = mouthX + "px";
     el.style.top = mouthY + "px";
 
     const rot = rand(-25, 25);
+
     el.style.setProperty("--tx", `0px`);
     el.style.setProperty("--ty", `0px`);
     el.style.setProperty("--rot", `${rot}deg`);
@@ -106,23 +127,14 @@ function spillPhysicsThenSettle() {
       rot,
       x: 0,
       y: 0,
-      vx: rand(6, 14) + Math.random(),
-      vy: rand(-3, 6) + Math.random(),
-      startAt: performance.now() + i * 10
+      vx: rand(8, 18) + Math.random(),   // more push out of jar
+      vy: rand(-6, 8) + Math.random(),
+      startAt: performance.now() + i * 8
     });
   }
 
- const gravity = 0.85;     // stronger fall
-const friction = 0.985;   // less damping
-const bounce = 0.88;      // bouncier walls/floor
-
-  const minX = -mouthX + 10;
-  const maxX = (W - PAPER_W) - mouthX - 10;
-  const minY = -mouthY + 10;
-  const maxY = (H - PAPER_H) - mouthY - 10;
-
   const start = performance.now();
-  const PHYS_MS = 2200;
+  const PHYS_MS = 2600;
 
   function tick(now) {
     const t = now - start;
@@ -131,32 +143,31 @@ const bounce = 0.88;      // bouncier walls/floor
       if (now < s.startAt) continue;
 
       s.vy += gravity;
+
       s.vx *= friction;
       s.vy *= friction;
 
       s.x += s.vx;
       s.y += s.vy;
 
-    if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
-if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
+      // wall bounce
+      if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
+      if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
 
-if (s.y < minY) {
-  s.y = minY;
-  s.vy *= -bounce;
-}
+      // ceiling bounce
+      if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
 
-if (s.y > maxY) {
-  s.y = maxY;
+      // FLOOR bounce (real bottom!)
+      if (s.y > maxY) {
+        s.y = maxY;
+        s.vy *= -bounce;
 
-  // bounce upward
-  s.vy *= -bounce;
+        // give it a pop if it would “die” on the floor
+        if (Math.abs(s.vy) < 2.2) s.vy = -rand(4, 10);
 
-  // add a little “pop” so it actually lifts
-  if (Math.abs(s.vy) < 2.5) s.vy = -rand(3, 7);
-
-  // add some sideways scatter so they don’t stack perfectly
-  s.vx += rand(-2, 2);
-}
+        // sideways scatter so they don’t pile
+        s.vx += rand(-3, 3);
+      }
 
       s.el.style.setProperty("--tx", `${s.x}px`);
       s.el.style.setProperty("--ty", `${s.y}px`);
@@ -172,8 +183,8 @@ if (s.y > maxY) {
 
 function settleIntoGrid(states, mouthX, mouthY) {
   const gap = 14;
-  const tileW = 140;
-  const tileH = 96;
+  const tileW = 150;
+  const tileH = 110;
 
   const usableW = papersWrap.clientWidth - 36;
   const cols = Math.max(1, Math.floor((usableW + gap) / (tileW + gap)));
@@ -188,7 +199,6 @@ function settleIntoGrid(states, mouthX, mouthY) {
     const finalRot = rand(-7, 7);
     s.finalRotation = finalRot;
 
-    // gently glide into place
     setTimeout(() => {
       s.el.classList.remove("flying");
       s.el.style.setProperty("--tx", `${tx - mouthX}px`);
@@ -197,7 +207,7 @@ function settleIntoGrid(states, mouthX, mouthY) {
     }, i * 6);
   });
 
-  setTimeout(() => convertToScrollableGrid(states), 1100);
+  setTimeout(() => convertToScrollableGrid(states), 1200);
 }
 
 function convertToScrollableGrid(states) {
@@ -207,11 +217,9 @@ function convertToScrollableGrid(states) {
   grid.className = "papersGrid";
 
   states.forEach((s) => {
-    // keep slant in grid, but grid controls position
     s.el.style.setProperty("--tx", `0px`);
     s.el.style.setProperty("--ty", `0px`);
     s.el.style.setProperty("--rot", `${s.finalRotation ?? rand(-7, 7)}deg`);
-
     grid.appendChild(s.el);
   });
 
@@ -249,7 +257,6 @@ function closeModalFn() {
   }
 }
 
-// utils
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
