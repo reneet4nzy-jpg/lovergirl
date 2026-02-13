@@ -8,6 +8,27 @@ body{
   place-items:center;
   background:#faf7ff;
 }
+html, body {
+  height: 100%;
+}
+
+body{
+  margin:0;
+  /* keep your existing background color */
+  background:#faf7ff;
+  position: relative;
+}
+
+/* FRAME OVERLAY */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 18px;                 /* controls how “inset” the frame is */
+  background: url("frame.png") center / contain no-repeat;
+  pointer-events: none;        /* so you can still click the jar/notes */
+  z-index: 999999;             /* stays above everything */
+  opacity: 0.95;               /* optional */
+}
 
 main{
   width:100%;
