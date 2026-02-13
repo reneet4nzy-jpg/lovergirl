@@ -1,13 +1,11 @@
-// =================================================
-// PASSWORD
-// =================================================
-
+// NOTE: Front-end passwords aren't truly secure on static sites.
+// For casual privacy, it's fine.
 const PASSWORD = "1234";
 
-// =================================================
-// SAMPLE MESSAGES (replace later if you want)
-// =================================================
+let spilled = false;
+let lastOpenedPaper = null;
 
+// You can replace these later with your real 100 messages.
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
@@ -21,10 +19,7 @@ const messages = [
   "Your laugh is my favourite sound."
 ];
 
-// =================================================
 // DOM
-// =================================================
-
 const gate = document.getElementById("gate");
 const app = document.getElementById("app");
 const pw = document.getElementById("pw");
@@ -41,21 +36,16 @@ const modal = document.getElementById("modal");
 const modalText = document.getElementById("modalText");
 const closeModal = document.getElementById("closeModal");
 
+// Ensure modal starts hidden even if CSS loads late
 modal.classList.add("hidden");
 
-let spilled = false;
-let lastOpenedPaper = null;
-
-// =================================================
-// PASSWORD LOGIC
-// =================================================
-
+// Password gate
 enterBtn.addEventListener("click", () => {
   if (pw.value === PASSWORD) {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "Wrong password 😭";
+    gateMsg.textContent = "Typo perchance? insert sad hampter";
   }
 });
 
@@ -63,80 +53,82 @@ pw.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enterBtn.click();
 });
 
-// =================================================
-// JAR TIP + SPILL
-// =================================================
-
+// Jar click: hide title, tip jar, then spill
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
 
   if (jarTitle) jarTitle.style.display = "none";
-
-  // tip jar sideways
   jarWrap.classList.add("tipped");
 
-  // wait for rotation animation before spilling
-  setTimeout(() => {
-    spillPapers(true);
-  }, 500);
+  setTimeout(() => spillPapers(true), 500);
 });
-
-// =================================================
-// SPILL FUNCTION (SIDE POUR)
-// =================================================
 
 function spillPapers(isTipped = false) {
   const W = papersWrap.clientWidth;
   const H = papersWrap.clientHeight;
 
-  const pool = [...messages].sort(() => Math.random() - 0.5);
-  const count = Math.min(100, pool.length);
+  // Use up to 100 notes (repeat if you have <100 sample msgs)
+  const pool = [];
+  while (pool.length < 100) {
+    pool.push(...messages);
+  }
+  pool.length = 100;
 
-  // jar mouth position (right side when tipped)
-const sceneRect = papersWrap.getBoundingClientRect();
+  // Where is the jar INSIDE the papers box?
+  const papersRect = papersWrap.getBoundingClientRect();
+  const jarRect = jarWrap.getBoundingClientRect();
 
-const centerX = sceneRect.width / 2;
-const centerY = sceneRect.height / 2;
+  const jarCenterX = (jarRect.left + jarRect.width / 2) - papersRect.left;
+  const jarCenterY = (jarRect.top + jarRect.height / 2) - papersRect.top;
 
-const mouthX = isTipped ? centerX + 40 : centerX;
-const mouthY = isTipped ? centerY - 20 : centerY - 40;
+  // Mouth offset: when tipped, pour from the right side of jar
+  const mouthX = isTipped ? jarCenterX + 45 : jarCenterX;
+  const mouthY = isTipped ? jarCenterY + 10 : jarCenterY;
 
-  for (let i = 0; i < count; i++) {
+  const PAPER_W = 110;
+  const PAPER_H = 80;
 
+  for (let i = 0; i < pool.length; i++) {
     const msg = pool[i];
     const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
 
     const p = document.createElement("div");
     p.className = "paper";
-    p.innerHTML = `<div class="preview">${preview}</div>`;
+    p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
 
+    // Anchor at jar mouth
     p.style.left = mouthX + "px";
     p.style.top = mouthY + "px";
-
-    const rot = rand(-35, 35);
 
     p.addEventListener("click", () => openMessage(msg, p));
     papersWrap.appendChild(p);
 
-    // physics variables
-    let x = 0;
-    let y = 0;
+    // Physics-ish
+    let x = 0, y = 0;
+    const rot = rand(-35, 35);
 
-    // sideways pour if tipped
-    let vx = isTipped ? rand(4, 10) : rand(-4, 4);
-    let vy = isTipped ? rand(-2, 2) : rand(2, 6);
+    // Pour direction:
+    // tipped: mostly right, a bit upward/downward, then gravity takes over
+    let vx = isTipped ? rand(5, 12) : rand(-4, 4);
+    let vy = isTipped ? rand(-3, 3) : rand(2, 6);
 
-    const gravity = 0.5;
+    const gravity = 0.55;
     const friction = 0.985;
     const bounce = 0.55;
 
-    const delay = i * 15;
+    // keep inside box: clamp relative to mouth position
+    const minX = -mouthX + 10;
+    const maxX = (W - PAPER_W) - mouthX - 10;
+    const minY = -mouthY + 10;
+    const maxY = (H - PAPER_H) - mouthY - 10;
+
+    // Stagger so it feels like a pour
+    const delay = i * 16;
 
     setTimeout(() => {
-
       function tick() {
-
+        // integrate
         vy += gravity;
         vx *= friction;
         vy *= friction;
@@ -144,34 +136,29 @@ const mouthY = isTipped ? centerY - 20 : centerY - 40;
         x += vx;
         y += vy;
 
-        const floor = H - 120;
-
-        if (y > floor) {
-          y = floor;
-          vy = -vy * bounce;
-          if (Math.abs(vy) < 0.8) vy = 0;
-        }
+        // bounce off boundaries
+        if (x < minX) { x = minX; vx *= -0.6; }
+        if (x > maxX) { x = maxX; vx *= -0.6; }
+        if (y < minY) { y = minY; vy *= -0.6; }
+        if (y > maxY) { y = maxY; vy *= -bounce; }
 
         p.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
 
-        if (Math.abs(vx) > 0.2 || Math.abs(vy) > 0.2) {
-          requestAnimationFrame(tick);
-        }
+        // stop when basically settled
+        const settled = Math.abs(vx) < 0.18 && Math.abs(vy) < 0.25;
+        if (!settled) requestAnimationFrame(tick);
       }
 
       requestAnimationFrame(tick);
-
     }, delay);
   }
 }
 
-// =================================================
-// MODAL
-// =================================================
-
+// Modal open/close
 function openMessage(text, paperEl) {
   if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
     lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
   }
 
   lastOpenedPaper = paperEl;
@@ -191,13 +178,23 @@ modal.addEventListener("click", (e) => {
 function closeModalFn() {
   modal.classList.add("hidden");
   modalText.textContent = "";
-  if (lastOpenedPaper) lastOpenedPaper.classList.remove("opened");
+  if (lastOpenedPaper) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
 }
 
-// =================================================
-// UTIL
-// =================================================
-
+// Helpers
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[c]));
 }
