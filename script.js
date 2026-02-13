@@ -35,7 +35,9 @@ const closeModal = document.getElementById("closeModal");
 
 modal.classList.add("hidden");
 
-// Password gate
+/* =========================
+   PASSWORD GATE
+========================= */
 enterBtn.addEventListener("click", () => {
   if (pw.value === PASSWORD) {
     gate.classList.add("hidden");
@@ -44,11 +46,14 @@ enterBtn.addEventListener("click", () => {
     gateMsg.textContent = "typo perchance? insert sad hampter";
   }
 });
+
 pw.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enterBtn.click();
 });
 
-// Jar click
+/* =========================
+   JAR CLICK
+========================= */
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
@@ -67,11 +72,7 @@ function spillPhysicsThenSettle() {
   while (pool.length < 100) pool.push(...messages);
   pool.length = 100;
 
-  // Container size
-  const W = papersWrap.clientWidth;
-  const H = papersWrap.clientHeight;
-
-  // Jar mouth position INSIDE papers (container coords)
+  // Jar mouth position inside papers
   const papersRect = papersWrap.getBoundingClientRect();
   const jarRect = (jarWrap || jar).getBoundingClientRect();
   const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45;
@@ -89,7 +90,7 @@ function spillPhysicsThenSettle() {
   const PAPER_H = temp.offsetHeight || 96;
   temp.remove();
 
-  // Physics (container coords: x,y are absolute inside papers)
+  // Physics settings
   const gravity = 0.95;
   const friction = 0.988;
   const bounce = 0.90;
@@ -104,15 +105,14 @@ function spillPhysicsThenSettle() {
     el.className = "paper flying";
     el.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
 
-    // IMPORTANT: we now position papers using absolute container coords,
-    // so left/top of element is 0,0 and we move with --tx/--ty only.
     el.style.left = "0px";
     el.style.top = "0px";
 
     const rot = rand(-25, 25);
-    el.style.setProperty("--rot", `${rot}deg`);
+
     el.style.setProperty("--tx", `${mouthX}px`);
     el.style.setProperty("--ty", `${mouthY}px`);
+    el.style.setProperty("--rot", `${rot}deg`);
 
     el.addEventListener("click", () => openMessage(msg, el));
     papersWrap.appendChild(el);
@@ -120,7 +120,6 @@ function spillPhysicsThenSettle() {
     states.push({
       el,
       rot,
-      msg,
       x: mouthX,
       y: mouthY,
       vx: rand(8, 18) + Math.random(),
@@ -135,6 +134,12 @@ function spillPhysicsThenSettle() {
   function tick(now) {
     const t = now - start;
 
+    const rect = papersWrap.getBoundingClientRect();
+    const minX = 8;
+    const maxX = rect.width - PAPER_W - 8;
+    const minY = 8;
+    const maxY = rect.height - PAPER_H - 8; // true bottom
+
     for (const s of states) {
       if (now < s.startAt) continue;
 
@@ -146,33 +151,22 @@ function spillPhysicsThenSettle() {
       s.x += s.vx;
       s.y += s.vy;
 
-      // Recalculate actual box size every frame
-const rect = papersWrap.getBoundingClientRect();
-const minX = 8;
-const maxX = rect.width - PAPER_W - 8;
-const minY = 8;
-const maxY = rect.height - PAPER_H - 8;
+      // wall bounce
+      if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
+      if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
 
-// Wall bounce
-if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
-if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
+      // ceiling bounce
+      if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
 
-// Ceiling bounce
-if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
+      // floor bounce (true bottom)
+      if (s.y > maxY) {
+        s.y = maxY;
+        s.vy *= -bounce;
 
-// TRUE bottom bounce
-if (s.y > maxY) {
-  s.y = maxY;
-  s.vy *= -bounce;
+        // stronger visible bounce
+        if (Math.abs(s.vy) < 3) s.vy = -rand(6, 12);
 
-  // stronger visible bounce
-  if (Math.abs(s.vy) < 3) s.vy = -rand(6, 12);
-}
-
-        // pop so it visibly bounces
-        if (Math.abs(s.vy) < 2.2) s.vy = -rand(4, 10);
-
-        // scatter
+        // sideways scatter
         s.vx += rand(-3, 3);
       }
 
@@ -191,7 +185,99 @@ if (s.y > maxY) {
 function settleIntoGrid(states, PAPER_W, PAPER_H) {
   const gap = 14;
 
-  // --- Column rules (NO 5->6 jump on laptop) ---
+  // columns: phone 2, tablet 3, desktop 6 (NO 5->6 jump)
+  const w = papersWrap.clientWidth;
+  let cols = 6;
+  if (w < 520) cols = 2;
+  else if (w < 820) cols = 3;
+  else cols = 6;
+
+  states.forEach((s, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+
+    const tx = 18 + col * (PAPER_W + gap);
+    const ty = 18 + row * (PAPER_H + gap);
+
+    const finalRot = rand(-7, 7);
+    s.finalRotation = finalRot;
+
+    setTimeout(() => {
+      s.el.classList.remove("flying");
+      s.el.style.setProperty("--tx", `${tx}px`);
+      s.el.style.setProperty("--ty", `${ty}px`);
+      s.el.style.setProperty("--rot", `${finalRot}deg`);
+    }, i * 6);
+  });
+
+  setTimeout(() => convertToScrollableGrid(states), 1200);
+}
+
+function convertToScrollableGrid(states) {
+  papersWrap.classList.add("tray");
+
+  const grid = document.createElement("div");
+  grid.className = "papersGrid";
+
+  states.forEach((s) => {
+    s.el.style.setProperty("--tx", `0px`);
+    s.el.style.setProperty("--ty", `0px`);
+    s.el.style.setProperty("--rot", `${s.finalRotation ?? rand(-7, 7)}deg`);
+    grid.appendChild(s.el);
+  });
+
+  papersWrap.innerHTML = "";
+  papersWrap.appendChild(grid);
+  papersWrap.scrollTop = 0;
+}
+
+/* =========================
+   MODAL
+========================= */
+function openMessage(text, paperEl) {
+  if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
+
+  lastOpenedPaper = paperEl;
+  paperEl.classList.add("opened");
+  paperEl.style.opacity = 0.9;
+
+  modalText.textContent = text;
+  modal.classList.remove("hidden");
+}
+
+closeModal.addEventListener("click", closeModalFn);
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) closeModalFn();
+});
+
+function closeModalFn() {
+  modal.classList.add("hidden");
+  modalText.textContent = "";
+  if (lastOpenedPaper) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
+}
+
+/* =========================
+   UTILS
+========================= */
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
   // Desktop/laptop: 6 columns always
   // Phones: 2 cols, small tablets: 3 cols
   const w = papersWrap.clientWidth;
