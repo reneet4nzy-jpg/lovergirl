@@ -1,4 +1,4 @@
-const PASSWORD = "yourconstellationnowandforever";
+const PASSWORD = "1234";
 
 let spilled = false;
 let lastOpenedPaper = null;
