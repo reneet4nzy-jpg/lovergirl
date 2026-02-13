@@ -14,11 +14,13 @@ body{
 }
 
 main{
+  width:100%;
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  min-height:100vh;
+  text-align:center;
 }
 
 /* ================================================= */
@@ -54,8 +56,37 @@ main{
 .muted{ color:#777; margin-top:10px; }
 
 /* ================================================= */
+/* SCENE (CENTERED STAGE)                           */
+/* ================================================= */
+
+.scene{
+  width:min(980px, 94vw);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+}
+
+#jarTitle{
+  margin:0;
+  font-weight:600;
+}
+
+/* ================================================= */
 /* JAR                                              */
 /* ================================================= */
+
+.jarWrap{
+  display:inline-block;
+  transform-origin: 65% 75%;
+  transition: transform 700ms cubic-bezier(.2,.9,.2,1);
+  z-index:5;
+}
+
+.jarWrap.tipped{
+  transform: translateY(8px) rotate(90deg);
+}
 
 .jar{
   font-size:64px;
@@ -70,60 +101,26 @@ main{
 
 .jar:active{ transform: scale(.98); }
 
-.jarWrap{
-  display:inline-block;
-  transform-origin: 70% 60%; /* pivot near jar body */
-  transition: transform 700ms cubic-bezier(.2,.9,.2,1);
-}
-
-.jarWrap.tipped{
-  transform: translateY(8px) rotate(90deg) translateX(6px);
-}
 /* ================================================= */
-/* PAPER FIELD                                      */
+/* PAPER STAGE (CENTERED BOX)                       */
 /* ================================================= */
 
-/* ================================================= */
-/* SCENE LAYOUT (CENTRED JAR)                      */
-/* ================================================= */
-
-.scene{
-  position:relative;
-  width:100%;
-  height:600px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-/* jar sits in the exact middle */
-.jarWrap{
-  position:relative;
-  z-index:5;
-  transform-origin: 65% 75%;
-  transition: transform 700ms cubic-bezier(.2,.9,.2,1);
-}
-
-.jarWrap.tipped{
-  transform: translateY(8px) rotate(90deg);
-}
-
-/* papers fill entire scene */
 .papers{
   position:relative;
-  width:720px;              /* fixed stage width */
+  width:min(820px, 94vw);
   height:520px;
-  margin:40px auto 0 auto;  /* center horizontally */
+  margin:0 auto;
   border-radius:18px;
   background:rgba(255,255,255,.65);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
   overflow:hidden;
 }
 
-/* papers themselves clickable */
+/* ================================================= */
+/* TORN PARCHMENT NOTES                             */
+/* ================================================= */
+
 .paper{
-  pointer-events:auto;
   position:absolute;
   width:110px;
   height:80px;
@@ -143,4 +140,94 @@ main{
 .paper:hover{
   transform: scale(1.06);
   filter: drop-shadow(0 14px 22px rgba(0,0,0,.24));
+}
+
+.paper .preview{
+  padding:18px 16px;
+  font-family: "Times New Roman", Times, serif;
+  font-size:14px;
+  line-height:1.2;
+  font-style: italic;
+  color: rgba(45, 25, 10, .92);
+
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+
+  text-align:center;
+}
+
+.paper.opened{
+  transform: scale(1.12);
+  z-index: 5;
+}
+
+/* ================================================= */
+/* MODAL (CENTERED)                                 */
+/* ================================================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  z-index:9999;
+}
+
+/* ================================================= */
+/* PARCHMENT LETTER (CENTERED)                      */
+/* ================================================= */
+
+.card{
+  width:min(720px, 94vw);
+  min-height: 420px;
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:80px;
+
+  background-image: url("parchment.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  filter: drop-shadow(0 28px 70px rgba(0,0,0,.35));
+
+  transform-origin: top center;
+  transform: perspective(900px) rotateX(-70deg) scale(.96);
+  opacity: 0;
+  transition: transform .35s ease, opacity .25s ease;
+}
+
+.modal:not(.hidden) .card{
+  transform: perspective(900px) rotateX(0deg) scale(1);
+  opacity: 1;
+}
+
+.modalText{
+  font-family: "Times New Roman", Times, serif;
+  font-size:28px;
+  line-height:1.6;
+  text-align:center;
+  color: rgba(45, 25, 10, .94);
+  max-width: 70%;
+  white-space:pre-wrap;
+}
+
+.close{
+  position:absolute;
+  top:40px;
+  right:50px;
+  border:none;
+  background:transparent;
+  font-size:22px;
+  font-weight:bold;
+  cursor:pointer;
+  color: rgba(60,40,20,.9);
 }
