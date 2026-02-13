@@ -1,5 +1,3 @@
-// ===== REPLACE YOUR ENTIRE script.js WITH THIS =====
-
 const PASSWORD = "1234";
 
 let spilled = false;
@@ -64,7 +62,7 @@ jar.addEventListener("click", () => {
 function spillPhysicsThenSettle() {
   papersWrap.innerHTML = "";
 
-  // build exactly 100 notes (repeat demo messages if needed)
+  // build 100 notes (repeat demo messages for now)
   const pool = [];
   while (pool.length < 100) pool.push(...messages);
   pool.length = 100;
@@ -87,39 +85,34 @@ function spillPhysicsThenSettle() {
     const msg = pool[i];
     const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
 
-    const p = document.createElement("div");
-    p.className = "paper flying";
-    p.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
+    const el = document.createElement("div");
+    el.className = "paper flying";
+    el.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
 
-    p.style.left = mouthX + "px";
-    p.style.top = mouthY + "px";
-
-    // initial CSS vars
-    p.style.setProperty("--tx", `0px`);
-    p.style.setProperty("--ty", `0px`);
-
-    p.addEventListener("click", () => openMessage(msg, p));
-    papersWrap.appendChild(p);
+    // anchor at the jar mouth
+    el.style.left = mouthX + "px";
+    el.style.top = mouthY + "px";
 
     const rot = rand(-25, 25);
+    el.style.setProperty("--tx", `0px`);
+    el.style.setProperty("--ty", `0px`);
+    el.style.setProperty("--rot", `${rot}deg`);
 
-    const s = {
-      el: p,
+    el.addEventListener("click", () => openMessage(msg, el));
+    papersWrap.appendChild(el);
+
+    states.push({
+      el,
       rot,
       x: 0,
       y: 0,
-      vx: rand(5, 12) + Math.random(),
-      vy: rand(-3, 4) + Math.random(),
-      startAt: performance.now() + i * 12
-    };
-
-    // set initial rotation var
-    p.style.setProperty("--rot", `${rot}deg`);
-
-    states.push(s);
+      vx: rand(6, 14) + Math.random(),
+      vy: rand(-3, 6) + Math.random(),
+      startAt: performance.now() + i * 10
+    });
   }
 
-  const gravity = 0.38;
+  const gravity = 0.40;
   const friction = 0.992;
   const bounce = 0.72;
 
@@ -131,7 +124,7 @@ function spillPhysicsThenSettle() {
   const start = performance.now();
   const PHYS_MS = 2200;
 
-  function physicsTick(now) {
+  function tick(now) {
     const t = now - start;
 
     for (const s of states) {
@@ -149,20 +142,16 @@ function spillPhysicsThenSettle() {
       if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
       if (s.y > maxY) { s.y = maxY; s.vy *= -bounce; }
 
-      // update CSS vars (keeps tilt!)
       s.el.style.setProperty("--tx", `${s.x}px`);
       s.el.style.setProperty("--ty", `${s.y}px`);
       s.el.style.setProperty("--rot", `${s.rot}deg`);
     }
 
-    if (t < PHYS_MS) {
-      requestAnimationFrame(physicsTick);
-    } else {
-      settleIntoGrid(states, mouthX, mouthY);
-    }
+    if (t < PHYS_MS) requestAnimationFrame(tick);
+    else settleIntoGrid(states, mouthX, mouthY);
   }
 
-  requestAnimationFrame(physicsTick);
+  requestAnimationFrame(tick);
 }
 
 function settleIntoGrid(states, mouthX, mouthY) {
@@ -173,7 +162,7 @@ function settleIntoGrid(states, mouthX, mouthY) {
   const usableW = papersWrap.clientWidth - 36;
   const cols = Math.max(1, Math.floor((usableW + gap) / (tileW + gap)));
 
-  const targets = states.map((s, i) => {
+  states.forEach((s, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
 
@@ -181,27 +170,18 @@ function settleIntoGrid(states, mouthX, mouthY) {
     const ty = 18 + row * (tileH + gap);
 
     const finalRot = rand(-7, 7);
+    s.finalRotation = finalRot;
 
-    return { s, x: tx - mouthX, y: ty - mouthY, rot: finalRot };
-  });
-
-  for (const { s } of targets) {
-    s.el.classList.remove("flying");
-    s.el.classList.add("settling");
-    s.el.style.opacity = 1;
-  }
-
-  targets.forEach(({ s, x, y, rot }, i) => {
-    const delay = i * 6;
+    // gently glide into place
     setTimeout(() => {
-      s.el.style.setProperty("--tx", `${x}px`);
-      s.el.style.setProperty("--ty", `${y}px`);
-      s.el.style.setProperty("--rot", `${rot}deg`);
-      s.finalRotation = rot;
-    }, delay);
+      s.el.classList.remove("flying");
+      s.el.style.setProperty("--tx", `${tx - mouthX}px`);
+      s.el.style.setProperty("--ty", `${ty - mouthY}px`);
+      s.el.style.setProperty("--rot", `${finalRot}deg`);
+    }, i * 6);
   });
 
-  setTimeout(() => convertToScrollableGrid(states), 1050);
+  setTimeout(() => convertToScrollableGrid(states), 1100);
 }
 
 function convertToScrollableGrid(states) {
@@ -210,15 +190,13 @@ function convertToScrollableGrid(states) {
   const grid = document.createElement("div");
   grid.className = "papersGrid";
 
-  states.forEach(({ el, finalRotation }) => {
-    el.classList.remove("settling");
+  states.forEach((s) => {
+    // keep slant in grid, but grid controls position
+    s.el.style.setProperty("--tx", `0px`);
+    s.el.style.setProperty("--ty", `0px`);
+    s.el.style.setProperty("--rot", `${s.finalRotation ?? rand(-7, 7)}deg`);
 
-    const rot = (typeof finalRotation === "number") ? finalRotation : rand(-7, 7);
-    el.style.setProperty("--tx", `0px`);
-    el.style.setProperty("--ty", `0px`);
-    el.style.setProperty("--rot", `${rot}deg`);
-
-    grid.appendChild(el);
+    grid.appendChild(s.el);
   });
 
   papersWrap.innerHTML = "";
@@ -235,7 +213,7 @@ function openMessage(text, paperEl) {
 
   lastOpenedPaper = paperEl;
   paperEl.classList.add("opened");
-  paperEl.style.opacity = 0.85;
+  paperEl.style.opacity = 0.9;
 
   modalText.textContent = text;
   modal.classList.remove("hidden");
