@@ -228,3 +228,7 @@ main{
   cursor:pointer;
   color: rgba(60,40,20,.9);
 }
+
+.paper.settling{
+  transition: transform 900ms cubic-bezier(.2,.9,.2,1);
+}
