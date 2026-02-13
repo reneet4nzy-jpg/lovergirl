@@ -6,17 +6,20 @@ let lastOpenedPaper = null;
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
-  const messages = [
+
   {
+    preview: "You need a kiss 💋",
     text: "You need a kiss.\n\nA little kiss for u.\n\nMwah, I love you.",
     img: "kisses.jpg"
   },
+
   {
-      text: "U miss me but I’m busy.\n\nHii babyy, I’m sorry. I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling, my love.",
+    preview: "If I'm not replying…",
+    text: "U miss me but I’m busy.\n\nHii babyy, I’m sorry. I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling, my love."
+  },
 
   "Your laugh is my favourite sound."
 ];
-
 
 /* ================= DOM ================= */
 
@@ -29,7 +32,7 @@ const gateMsg = document.getElementById("gateMsg");
 const jar = document.getElementById("jar");
 const jarWrap = document.getElementById("jarWrap");
 const jarTitle = document.getElementById("jarTitle");
-
+const openWhenText = document.getElementById("openWhenText");
 
 const papersWrap = document.getElementById("papers");
 
@@ -65,9 +68,7 @@ jar.addEventListener("click", () => {
 
   if (openWhenText) {
     openWhenText.classList.remove("hidden");
-    setTimeout(() => {
-      openWhenText.classList.add("show");
-    }, 50);
+    setTimeout(() => openWhenText.classList.add("show"), 50);
   }
 
   setTimeout(() => spillPhysicsThenOrganize(), 450);
@@ -78,16 +79,18 @@ jar.addEventListener("click", () => {
 function spillPhysicsThenOrganize() {
   papersWrap.innerHTML = "";
 
+  // Build exactly 100 notes (repeat messages)
   const pool = [];
   while (pool.length < 100) pool.push(...messages);
   pool.length = 100;
 
+  // Jar mouth position inside papers
   const papersRect = papersWrap.getBoundingClientRect();
   const jarRect = (jarWrap || jar).getBoundingClientRect();
-
   const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45;
   const mouthY = (jarRect.top + jarRect.height / 2) - papersRect.top + 10;
 
+  // Measure real paper size
   const temp = document.createElement("div");
   temp.className = "paper";
   temp.style.opacity = "0";
@@ -97,6 +100,7 @@ function spillPhysicsThenOrganize() {
   const PAPER_H = temp.offsetHeight || 96;
   temp.remove();
 
+  // Physics settings
   const gravity = 0.95;
   const friction = 0.988;
   const bounce = 0.9;
@@ -105,7 +109,12 @@ function spillPhysicsThenOrganize() {
 
   for (let i = 0; i < pool.length; i++) {
     const msg = pool[i];
-    const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
+
+    // ✅ preview works for strings AND objects
+    const preview =
+      typeof msg === "object"
+        ? (msg.preview || "Open me…")
+        : msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
 
     const el = document.createElement("div");
     el.className = "paper flying";
@@ -117,7 +126,7 @@ function spillPhysicsThenOrganize() {
     el.style.setProperty("--ty", `${mouthY}px`);
     el.style.setProperty("--rot", `${rot}deg`);
 
-   el.addEventListener("click", () => openMessage(pool[i], el));
+    el.addEventListener("click", () => openMessage(msg, el));
     papersWrap.appendChild(el);
 
     states.push({
@@ -166,11 +175,8 @@ function spillPhysicsThenOrganize() {
       s.el.style.setProperty("--ty", `${s.y}px`);
     }
 
-    if (now - start < PHYS_DURATION) {
-      requestAnimationFrame(tick);
-    } else {
-      organizeIntoGrid(states, PAPER_W, PAPER_H);
-    }
+    if (now - start < PHYS_DURATION) requestAnimationFrame(tick);
+    else organizeIntoGrid(states, PAPER_W, PAPER_H);
   }
 
   requestAnimationFrame(tick);
@@ -205,7 +211,6 @@ function organizeIntoGrid(states, PAPER_W, PAPER_H) {
 
       const dx = s.slotX - s.x;
       const dy = s.slotY - s.y;
-
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       s.vx += dx * magnet;
@@ -234,11 +239,8 @@ function organizeIntoGrid(states, PAPER_W, PAPER_H) {
       }
     }
 
-    if (!allLocked) {
-      requestAnimationFrame(magnetLoop);
-    } else {
-      enableScrollMode(states);
-    }
+    if (!allLocked) requestAnimationFrame(magnetLoop);
+    else enableScrollMode(states);
   }
 
   requestAnimationFrame(magnetLoop);
@@ -252,7 +254,7 @@ function enableScrollMode(states) {
   const grid = document.createElement("div");
   grid.className = "papersGrid";
 
-  states.forEach(s => {
+  states.forEach((s) => {
     s.el.style.setProperty("--tx", "0px");
     s.el.style.setProperty("--ty", "0px");
     grid.appendChild(s.el);
@@ -265,17 +267,7 @@ function enableScrollMode(states) {
 
 /* ================= MODAL ================= */
 
-function openMessage(text, paperEl) {
-  if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
-    lastOpenedPaper.classList.remove("opened");
-    lastOpenedPaper.style.opacity = 1;
-  }
-
-  lastOpenedPaper = paperEl;
-  paperEl.classList.add("opened");
-  paperEl.style.opacity = 0.9;
-
- function openMessage(message, paperEl) {
+function openMessage(message, paperEl) {
   if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
     lastOpenedPaper.classList.remove("opened");
     lastOpenedPaper.style.opacity = 1;
@@ -287,24 +279,27 @@ function openMessage(text, paperEl) {
 
   modalText.innerHTML = "";
 
-  // Add text
-  const textEl = document.createElement("div");
-  textEl.textContent = message.text;
-  modalText.appendChild(textEl);
+  // message can be STRING or OBJECT
+  if (typeof message === "object") {
+    // text
+    const textEl = document.createElement("div");
+    textEl.textContent = message.text || "";
+    modalText.appendChild(textEl);
 
-  // Add image if it exists
-  if (message.img) {
-    const imgEl = document.createElement("img");
-    imgEl.src = message.img;
-    imgEl.style.marginTop = "20px";
-    imgEl.style.maxWidth = "80%";
-    imgEl.style.borderRadius = "12px";
-    imgEl.style.boxShadow = "0 10px 25px rgba(0,0,0,.2)";
-    modalText.appendChild(imgEl);
+    // optional image
+    if (message.img) {
+      const imgEl = document.createElement("img");
+      imgEl.src = message.img;
+      imgEl.style.marginTop = "20px";
+      imgEl.style.maxWidth = "80%";
+      imgEl.style.borderRadius = "12px";
+      imgEl.style.boxShadow = "0 10px 25px rgba(0,0,0,.2)";
+      modalText.appendChild(imgEl);
+    }
+  } else {
+    modalText.textContent = message;
   }
 
-  modal.classList.remove("hidden");
-}
   modal.classList.remove("hidden");
 }
 
