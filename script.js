@@ -94,8 +94,13 @@ function spillPapers(isTipped = false) {
   const count = Math.min(100, pool.length);
 
   // jar mouth position (right side when tipped)
-  const mouthX = isTipped ? W / 2 + 60 : W / 2;
-  const mouthY = isTipped ? 60 : 35;
+const sceneRect = papersWrap.getBoundingClientRect();
+
+const centerX = sceneRect.width / 2;
+const centerY = sceneRect.height / 2;
+
+const mouthX = isTipped ? centerX + 40 : centerX;
+const mouthY = isTipped ? centerY - 20 : centerY - 40;
 
   for (let i = 0; i < count; i++) {
 
