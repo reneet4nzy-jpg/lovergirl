@@ -8,7 +8,7 @@ const messages = [
   "I love the way your eyes soften when you smile.",
 {
     preview: "You need to know how much i love you",
-    text: "remember that i love you so much that wed be immortalised as constellations after we die because of how much i love you. death shall not do us part because of how much i love you. \n\njust as orpheus loved eurydice, i shall steal a glance at the man i love with every bit of me, exam or not."
+    text: "remember that i love you so much that wed be immortalised as constellations after we die because of how much i love you. death shall not do us part because i love you so. \n\njust as orpheus loved eurydice, i shall steal a glance at the man i love with every bit of me, exam or not."
   },
   {
     preview: "You need a kiss",
