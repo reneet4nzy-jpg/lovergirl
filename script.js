@@ -12,9 +12,8 @@ const messages = [
   },
   {
     preview: "You need a kiss",
-    text: "A little kiss for u",
+    text: "A little kiss for u\nMwah, I love you.",
     img: "kisses.jpg"
-    text: "Mwah, I love you.",
   },
 
   {
