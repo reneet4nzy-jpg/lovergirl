@@ -16,7 +16,8 @@ const messages = [
   "Your laugh is my favourite sound."
 ];
 
-// DOM
+/* ================= DOM ================= */
+
 const gate = document.getElementById("gate");
 const app = document.getElementById("app");
 const pw = document.getElementById("pw");
@@ -35,9 +36,8 @@ const closeModal = document.getElementById("closeModal");
 
 modal.classList.add("hidden");
 
-/* =========================
-   PASSWORD GATE
-========================= */
+/* ================= PASSWORD ================= */
+
 enterBtn.addEventListener("click", () => {
   if (pw.value === PASSWORD) {
     gate.classList.add("hidden");
@@ -51,9 +51,8 @@ pw.addEventListener("keydown", (e) => {
   if (e.key === "Enter") enterBtn.click();
 });
 
-/* =========================
-   JAR CLICK
-========================= */
+/* ================= JAR CLICK ================= */
+
 jar.addEventListener("click", () => {
   if (spilled) return;
   spilled = true;
@@ -61,28 +60,26 @@ jar.addEventListener("click", () => {
   if (jarTitle) jarTitle.style.display = "none";
   if (jarWrap) jarWrap.classList.add("tipped");
 
-  setTimeout(() => spillPhysicsThenSettle(), 450);
+  setTimeout(() => spillPhysicsThenOrganize(), 450);
 });
 
-function spillPhysicsThenSettle() {
+/* ================= PHYSICS ================= */
+
+function spillPhysicsThenOrganize() {
   papersWrap.innerHTML = "";
 
-  // Build exactly 100 notes (repeat demo messages for now)
   const pool = [];
   while (pool.length < 100) pool.push(...messages);
   pool.length = 100;
 
-  // Jar mouth position inside papers
   const papersRect = papersWrap.getBoundingClientRect();
   const jarRect = (jarWrap || jar).getBoundingClientRect();
+
   const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45;
   const mouthY = (jarRect.top + jarRect.height / 2) - papersRect.top + 10;
 
-  // Measure real paper size
   const temp = document.createElement("div");
   temp.className = "paper";
-  temp.style.left = "0px";
-  temp.style.top = "0px";
   temp.style.opacity = "0";
   temp.innerHTML = `<div class="preview">test</div>`;
   papersWrap.appendChild(temp);
@@ -90,10 +87,9 @@ function spillPhysicsThenSettle() {
   const PAPER_H = temp.offsetHeight || 96;
   temp.remove();
 
-  // Physics settings
   const gravity = 0.95;
   const friction = 0.988;
-  const bounce = 0.90;
+  const bounce = 0.9;
 
   const states = [];
 
@@ -104,9 +100,6 @@ function spillPhysicsThenSettle() {
     const el = document.createElement("div");
     el.className = "paper flying";
     el.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
-
-    el.style.left = "0px";
-    el.style.top = "0px";
 
     const rot = rand(-25, 25);
 
@@ -122,107 +115,136 @@ function spillPhysicsThenSettle() {
       rot,
       x: mouthX,
       y: mouthY,
-      vx: rand(8, 18) + Math.random(),
-      vy: rand(-6, 8) + Math.random(),
-      startAt: performance.now() + i * 8
+      vx: rand(8, 18),
+      vy: rand(-6, 8),
+      locked: false
     });
   }
 
+  const PHYS_DURATION = 2200;
   const start = performance.now();
-  const PHYS_MS = 2600;
 
   function tick(now) {
-    const t = now - start;
-
     const rect = papersWrap.getBoundingClientRect();
     const minX = 8;
     const maxX = rect.width - PAPER_W - 8;
     const minY = 8;
-    const maxY = rect.height - PAPER_H - 8; // true bottom
+    const maxY = rect.height - PAPER_H - 8;
 
     for (const s of states) {
-      if (now < s.startAt) continue;
+      if (s.locked) continue;
 
       s.vy += gravity;
-
       s.vx *= friction;
       s.vy *= friction;
 
       s.x += s.vx;
       s.y += s.vy;
 
-      // wall bounce
       if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
       if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
 
-      // ceiling bounce
       if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
 
-      // floor bounce (true bottom)
       if (s.y > maxY) {
         s.y = maxY;
         s.vy *= -bounce;
-
-        // stronger visible bounce
         if (Math.abs(s.vy) < 3) s.vy = -rand(6, 12);
-
-        // sideways scatter
-        s.vx += rand(-3, 3);
       }
 
       s.el.style.setProperty("--tx", `${s.x}px`);
       s.el.style.setProperty("--ty", `${s.y}px`);
-      s.el.style.setProperty("--rot", `${s.rot}deg`);
     }
 
-    if (t < PHYS_MS) requestAnimationFrame(tick);
-    else settleIntoGrid(states, PAPER_W, PAPER_H);
+    if (now - start < PHYS_DURATION) {
+      requestAnimationFrame(tick);
+    } else {
+      organizeIntoGrid(states, PAPER_W, PAPER_H);
+    }
   }
 
   requestAnimationFrame(tick);
 }
 
-function settleIntoGrid(states, PAPER_W, PAPER_H) {
+/* ================= ORGANIZE NATURALLY ================= */
+
+function organizeIntoGrid(states, PAPER_W, PAPER_H) {
   const gap = 14;
 
-  // columns: phone 2, tablet 3, desktop 6 (NO 5->6 jump)
   const w = papersWrap.clientWidth;
   let cols = 6;
   if (w < 520) cols = 2;
   else if (w < 820) cols = 3;
-  else cols = 6;
 
   states.forEach((s, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
 
-    const tx = 18 + col * (PAPER_W + gap);
-    const ty = 18 + row * (PAPER_H + gap);
-
-    const finalRot = rand(-7, 7);
-    s.finalRotation = finalRot;
-
-    setTimeout(() => {
-      s.el.classList.remove("flying");
-      s.el.style.setProperty("--tx", `${tx}px`);
-      s.el.style.setProperty("--ty", `${ty}px`);
-      s.el.style.setProperty("--rot", `${finalRot}deg`);
-    }, i * 6);
+    s.slotX = 18 + col * (PAPER_W + gap);
+    s.slotY = 18 + row * (PAPER_H + gap);
   });
 
-  setTimeout(() => convertToScrollableGrid(states), 1200);
+  const magnet = 0.08;
+  const lockDist = 6;
+
+  function magnetLoop() {
+    let allLocked = true;
+
+    for (const s of states) {
+      if (s.locked) continue;
+
+      const dx = s.slotX - s.x;
+      const dy = s.slotY - s.y;
+
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      s.vx += dx * magnet;
+      s.vy += dy * magnet;
+
+      s.x += s.vx;
+      s.y += s.vy;
+
+      s.vx *= 0.85;
+      s.vy *= 0.85;
+
+      s.el.style.setProperty("--tx", `${s.x}px`);
+      s.el.style.setProperty("--ty", `${s.y}px`);
+
+      if (dist < lockDist && Math.abs(s.vx) < 1 && Math.abs(s.vy) < 1) {
+        s.x = s.slotX;
+        s.y = s.slotY;
+        s.vx = 0;
+        s.vy = 0;
+        s.locked = true;
+
+        s.el.style.setProperty("--tx", `${s.x}px`);
+        s.el.style.setProperty("--ty", `${s.y}px`);
+      } else {
+        allLocked = false;
+      }
+    }
+
+    if (!allLocked) {
+      requestAnimationFrame(magnetLoop);
+    } else {
+      enableScrollMode(states);
+    }
+  }
+
+  requestAnimationFrame(magnetLoop);
 }
 
-function convertToScrollableGrid(states) {
+/* ================= SCROLL ACTIVATION ================= */
+
+function enableScrollMode(states) {
   papersWrap.classList.add("tray");
 
   const grid = document.createElement("div");
   grid.className = "papersGrid";
 
-  states.forEach((s) => {
-    s.el.style.setProperty("--tx", `0px`);
-    s.el.style.setProperty("--ty", `0px`);
-    s.el.style.setProperty("--rot", `${s.finalRotation ?? rand(-7, 7)}deg`);
+  states.forEach(s => {
+    s.el.style.setProperty("--tx", "0px");
+    s.el.style.setProperty("--ty", "0px");
     grid.appendChild(s.el);
   });
 
@@ -231,9 +253,8 @@ function convertToScrollableGrid(states) {
   papersWrap.scrollTop = 0;
 }
 
-/* =========================
-   MODAL
-========================= */
+/* ================= MODAL ================= */
+
 function openMessage(text, paperEl) {
   if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
     lastOpenedPaper.classList.remove("opened");
@@ -262,9 +283,8 @@ function closeModalFn() {
   }
 }
 
-/* =========================
-   UTILS
-========================= */
+/* ================= UTILS ================= */
+
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
