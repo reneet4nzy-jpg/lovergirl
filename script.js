@@ -1,249 +1,272 @@
-.hidden { display:none !important; }
+const PASSWORD = "1234";
 
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  background:#faf7ff;
+let spilled = false;
+let lastOpenedPaper = null;
+
+const messages = [
+  "You are my favourite hello and my hardest goodbye.",
+  "I love the way your eyes soften when you smile.",
+  "You make ordinary days feel like magic.",
+  "Thank you for choosing me.",
+  "You are my calm in every storm.",
+  "I still get excited every time I see your name.",
+  "You feel like home.",
+  "I would choose you in every lifetime.",
+  "You make my world warmer.",
+  "Your laugh is my favourite sound."
+];
+
+// DOM
+const gate = document.getElementById("gate");
+const app = document.getElementById("app");
+const pw = document.getElementById("pw");
+const enterBtn = document.getElementById("enterBtn");
+const gateMsg = document.getElementById("gateMsg");
+
+const jar = document.getElementById("jar");
+const jarWrap = document.getElementById("jarWrap");
+const jarTitle = document.getElementById("jarTitle");
+
+const papersWrap = document.getElementById("papers");
+
+const modal = document.getElementById("modal");
+const modalText = document.getElementById("modalText");
+const closeModal = document.getElementById("closeModal");
+
+modal.classList.add("hidden");
+
+// Password gate
+enterBtn.addEventListener("click", () => {
+  if (pw.value === PASSWORD) {
+    gate.classList.add("hidden");
+    app.classList.remove("hidden");
+  } else {
+    gateMsg.textContent = "typo perchance? insert sad hampter";
+  }
+});
+pw.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") enterBtn.click();
+});
+
+// Jar click
+jar.addEventListener("click", () => {
+  if (spilled) return;
+  spilled = true;
+
+  if (jarTitle) jarTitle.style.display = "none";
+  jarWrap.classList.add("tipped");
+
+  setTimeout(() => spillPhysicsThenSettle(), 450);
+});
+
+function spillPhysicsThenSettle() {
+  papersWrap.innerHTML = "";
+
+  // build 100 notes (repeat demo messages for now)
+  const pool = [];
+  while (pool.length < 100) pool.push(...messages);
+  pool.length = 100;
+
+  // get container size
+  const W = papersWrap.clientWidth;
+  const H = papersWrap.clientHeight;
+
+  // jar mouth position inside papers
+  const papersRect = papersWrap.getBoundingClientRect();
+  const jarRect = jarWrap.getBoundingClientRect();
+  const mouthX = (jarRect.left + jarRect.width / 2) - papersRect.left + 45;
+  const mouthY = (jarRect.top + jarRect.height / 2) - papersRect.top + 10;
+
+  // Create ONE temp paper to measure real size
+  const temp = document.createElement("div");
+  temp.className = "paper";
+  temp.style.left = "0px";
+  temp.style.top = "0px";
+  temp.style.opacity = "0";
+  temp.innerHTML = `<div class="preview">test</div>`;
+  papersWrap.appendChild(temp);
+
+  const PAPER_W = temp.offsetWidth || 140;
+  const PAPER_H = temp.offsetHeight || 96;
+  temp.remove();
+
+  // Physics settings (bouncy!)
+  const gravity = 0.95;
+  const friction = 0.988;
+  const bounce = 0.90;
+
+  // IMPORTANT: floor/ceiling based on REAL paper size
+  const minX = -mouthX + 8;
+  const maxX = (W - PAPER_W) - mouthX - 8;
+  const minY = -mouthY + 8;
+  const maxY = (H - PAPER_H) - mouthY - 8;
+
+  const states = [];
+
+  for (let i = 0; i < pool.length; i++) {
+    const msg = pool[i];
+    const preview = msg.slice(0, 22) + (msg.length > 22 ? "…" : "");
+
+    const el = document.createElement("div");
+    el.className = "paper flying";
+    el.innerHTML = `<div class="preview">${escapeHtml(preview)}</div>`;
+    el.style.left = mouthX + "px";
+    el.style.top = mouthY + "px";
+
+    const rot = rand(-25, 25);
+
+    el.style.setProperty("--tx", `0px`);
+    el.style.setProperty("--ty", `0px`);
+    el.style.setProperty("--rot", `${rot}deg`);
+
+    el.addEventListener("click", () => openMessage(msg, el));
+    papersWrap.appendChild(el);
+
+    states.push({
+      el,
+      rot,
+      x: 0,
+      y: 0,
+      vx: rand(8, 18) + Math.random(),   // more push out of jar
+      vy: rand(-6, 8) + Math.random(),
+      startAt: performance.now() + i * 8
+    });
+  }
+
+  const start = performance.now();
+  const PHYS_MS = 2600;
+
+  function tick(now) {
+    const t = now - start;
+
+    for (const s of states) {
+      if (now < s.startAt) continue;
+
+      s.vy += gravity;
+
+      s.vx *= friction;
+      s.vy *= friction;
+
+      s.x += s.vx;
+      s.y += s.vy;
+
+      // wall bounce
+      if (s.x < minX) { s.x = minX; s.vx *= -bounce; }
+      if (s.x > maxX) { s.x = maxX; s.vx *= -bounce; }
+
+      // ceiling bounce
+      if (s.y < minY) { s.y = minY; s.vy *= -bounce; }
+
+      // FLOOR bounce (real bottom!)
+      if (s.y > maxY) {
+        s.y = maxY;
+        s.vy *= -bounce;
+
+        // give it a pop if it would “die” on the floor
+        if (Math.abs(s.vy) < 2.2) s.vy = -rand(4, 10);
+
+        // sideways scatter so they don’t pile
+        s.vx += rand(-3, 3);
+      }
+
+      s.el.style.setProperty("--tx", `${s.x}px`);
+      s.el.style.setProperty("--ty", `${s.y}px`);
+      s.el.style.setProperty("--rot", `${s.rot}deg`);
+    }
+
+    if (t < PHYS_MS) requestAnimationFrame(tick);
+    else settleIntoGrid(states, mouthX, mouthY);
+  }
+
+  requestAnimationFrame(tick);
 }
 
-main{
-  width:100%;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
+function settleIntoGrid(states, mouthX, mouthY) {
+  const gap = 14;
+  const tileW = 150;
+  const tileH = 110;
+
+  const usableW = papersWrap.clientWidth - 36;
+  const cols = Math.max(1, Math.floor((usableW + gap) / (tileW + gap)));
+
+  states.forEach((s, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+
+    const tx = 18 + col * (tileW + gap);
+    const ty = 18 + row * (tileH + gap);
+
+    const finalRot = rand(-7, 7);
+    s.finalRotation = finalRot;
+
+    setTimeout(() => {
+      s.el.classList.remove("flying");
+      s.el.style.setProperty("--tx", `${tx - mouthX}px`);
+      s.el.style.setProperty("--ty", `${ty - mouthY}px`);
+      s.el.style.setProperty("--rot", `${finalRot}deg`);
+    }, i * 6);
+  });
+
+  setTimeout(() => convertToScrollableGrid(states), 1200);
 }
 
-/* PASSWORD GATE */
-.gate{
-  width:min(520px, 92vw);
-  background:white;
-  padding:24px;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  text-align:center;
-}
-.gate input{
-  width:min(320px, 80%);
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid #ddd;
-}
-.gate button{
-  margin-left:8px;
-  padding:10px 14px;
-  border-radius:10px;
-  border:0;
-  cursor:pointer;
-  background:#111;
-  color:#fff;
-}
-.muted{ color:#777; margin-top:10px; }
+function convertToScrollableGrid(states) {
+  papersWrap.classList.add("tray");
 
-/* SCENE */
-.scene{
-  width:min(980px, 94vw);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:14px;
-}
-#jarTitle{ margin:0; font-weight:600; }
+  const grid = document.createElement("div");
+  grid.className = "papersGrid";
 
-/* JAR */
-.jarWrap{
-  display:inline-block;
-  transform-origin: 65% 75%;
-  transition: transform 700ms cubic-bezier(.2,.9,.2,1);
-  z-index:5;
-}
-.jarWrap.tipped{
-  transform: translateY(8px) rotate(90deg);
-}
-.jar{
-  font-size:64px;
-  background:white;
-  border:0;
-  border-radius:20px;
-  padding:14px 18px;
-  cursor:pointer;
-  box-shadow:0 10px 30px rgba(0,0,0,.10);
-}
-.jar:active{ transform: scale(.98); }
+  states.forEach((s) => {
+    s.el.style.setProperty("--tx", `0px`);
+    s.el.style.setProperty("--ty", `0px`);
+    s.el.style.setProperty("--rot", `${s.finalRotation ?? rand(-7, 7)}deg`);
+    grid.appendChild(s.el);
+  });
 
-/* ================================================= */
-/* PAPERS AREA (container box is BACK)               */
-/* ================================================= */
-.papers{
-  width:100%;
-  height:520px;
-  margin-top:20px;
-  position:relative;
-
-  /* container background */
-  background: rgba(255,255,255,.65);
-  border-radius:18px;
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.06),
-    0 18px 45px rgba(0,0,0,.08);
-
-  overflow:hidden;
+  papersWrap.innerHTML = "";
+  papersWrap.appendChild(grid);
+  papersWrap.scrollTop = 0;
 }
 
-/* tray mode (scroll grid) */
-.papers.tray{
-  overflow:auto;
-  padding:18px;
+// Modal
+function openMessage(text, paperEl) {
+  if (lastOpenedPaper && lastOpenedPaper !== paperEl) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
 
-  /* makes phone scrolling feel good */
-  -webkit-overflow-scrolling: touch;
+  lastOpenedPaper = paperEl;
+  paperEl.classList.add("opened");
+  paperEl.style.opacity = 0.9;
 
-  /* prevents sideways scroll */
-  overflow-x:hidden;
+  modalText.textContent = text;
+  modal.classList.remove("hidden");
 }
 
-/* GRID: responsive + 6 columns on big screens */
-.papersGrid{
-  display:grid;
-  gap:14px;
-  background: transparent;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+closeModal.addEventListener("click", closeModalFn);
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) closeModalFn();
+});
+
+function closeModalFn() {
+  modal.classList.add("hidden");
+  modalText.textContent = "";
+  if (lastOpenedPaper) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
 }
 
-/* lock 6 columns on desktop */
-@media (min-width: 1000px){
-  .papersGrid{ grid-template-columns: repeat(6, 1fr); }
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/* NOTE */
-.paper{
-  position:absolute;
-  width:140px;
-  height:96px;
-  cursor:pointer;
-  user-select:none;
-
-  /* FORCE: no white box ever */
-  background-color: transparent !important;
-  background-image: url("parchment.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-
-  filter:none;
-  box-shadow:none;
-  will-change: transform;
-
-  --tx: 0px;
-  --ty: 0px;
-  --rot: 0deg;
-  --sc: 1;
-
-  transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--sc));
-  transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
-}
-
-/* while flying: absolutely no shadow */
-.paper.flying{
-  box-shadow:none !important;
-  filter:none !important;
-}
-
-/* once in tray/grid */
-.papers.tray .paper{
-  position:relative;
-  left:auto !important;
-  top:auto !important;
-  --tx: 0px !important;
-  --ty: 0px !important;
-
-  background-color: transparent !important;
-  box-shadow: 0 6px 14px rgba(0,0,0,.14);
-}
-
-/* keep them a little slanted in tray */
-.papers.tray .paper{
-  transform: rotate(var(--rot)) scale(var(--sc));
-}
-
-.paper:hover{ --sc: 1.04; }
-.paper.opened{ --sc: 1.08; z-index:5; }
-
-.paper .preview{
-  padding:18px 16px;
-  font-family: "Times New Roman", Times, serif;
-  font-size:14px;
-  line-height:1.2;
-  font-style: italic;
-  color: rgba(45, 25, 10, .92);
-  text-align:center;
-
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.35);
-  z-index:9999;
-}
-.card{
-  width:min(720px, 94vw);
-  min-height: 420px;
-  position:relative;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:80px;
-
-  background-image: url("parchment.png");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  filter: drop-shadow(0 28px 70px rgba(0,0,0,.35));
-
-  transform-origin: top center;
-  transform: perspective(900px) rotateX(-70deg) scale(.96);
-  opacity: 0;
-  transition: transform .35s ease, opacity .25s ease;
-}
-.modal:not(.hidden) .card{
-  transform: perspective(900px) rotateX(0deg) scale(1);
-  opacity: 1;
-}
-.modalText{
-  font-family: "Times New Roman", Times, serif;
-  font-size:28px;
-  line-height:1.6;
-  text-align:center;
-  color: rgba(45, 25, 10, .94);
-  max-width: 70%;
-  white-space:pre-wrap;
-}
-.close{
-  position:absolute;
-  top:40px;
-  right:50px;
-  border:none;
-  background:transparent;
-  font-size:22px;
-  font-weight:bold;
-  cursor:pointer;
-  color: rgba(60,40,20,.9);
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;"
+  }[c]));
 }
