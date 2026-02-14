@@ -304,3 +304,34 @@ body::before{
   transition: opacity 1.2s ease;
 }
 .openWhenTitle.show{ opacity:1; }
+
+/* ===== Phone fix: make the opened letter scrollable ===== */
+@media (max-width: 520px){
+  .card{
+    width: min(92vw, 720px);
+    max-height: 85vh;          /* keep it inside the screen */
+    overflow: auto;            /* allow scrolling inside the letter */
+    -webkit-overflow-scrolling: touch;
+
+    padding: 26px 22px;        /* smaller padding so more fits */
+    background-size: 100% 100%;
+  }
+
+  .modalText{
+    max-width: 100%;
+    font-size: 18px;           /* smaller text so it fits nicer */
+    line-height: 1.45;
+  }
+
+  .close{
+    top: 14px;
+    right: 16px;
+    font-size: 20px;
+  }
+
+  /* audio should not overflow */
+  .noteAudio{
+    width: 100%;
+    display: block;
+  }
+}
