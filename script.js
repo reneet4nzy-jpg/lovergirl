@@ -61,8 +61,23 @@ const messages = [
    
    {
     preview: "You angered me and dk what to do",
-    text: "i know sometimes i over-flip out so you can fall back on this foolproof plan:\nstep 1, transfer me 10000 dollars\nstep 2, send sugary delights to my place\nstep 3, show up at my door and ask me to seesaw, perhaps with flowers(only if i havent received any recently)\nstep 5, beg on your knees. and done!\n baby dont worry itll all blow over easily. well get past this okay? give it time. i love you, no matter what nonsense angry me said. you know me, you know how to handle me. good luck!"
+    text: "i know sometimes i over-flip out so you can fall back on this foolproof plan:\nstep 1, transfer me 10000 dollars\nstep 2, send sugary delights to my place\nstep 3, show up at my door and ask me to seesaw, perhaps with flowers(only if i havent received any recently)\nstep 5, beg on your knees. and done!\n baby dont worry itll all blow over easily. you know me, you know how to handle me. well get past this okay? give it time. i love you, no matter what nonsense angry me said. good luck!"
   },
+   
+   {
+  preview: "i fell asleep without the jingle:(",
+  text: `
+    im sorry my love. i mustve been exhausted. or perhaps angry(lets hope im not petty enough to sleep without saying goodnight)\n anyways i hope this makes up for it for now:
+
+    <audio controls class="noteAudio">
+      <source src="goodnight.m4a" type="audio/mp4">
+      <source src="goodnight.m4a" type="audio/x-m4a">
+      Your browser does not support audio.
+    </audio>
+
+    <p>mwah</p>
+  `
+},
 ];
 
 /* ================= DOM ================= */
