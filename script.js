@@ -12,7 +12,7 @@ const messages = [
 
     <audio controls style="width: 100%; margin-top: 10px;">
   <source src="hey there delilah.m4a" type="audio/mp4">
-  <source src="heytheredelilah.m4a" type="audio/x-m4a">
+  <source src="hey there delilah.m4a" type="audio/x-m4a">
   Your browser does not support audio.
 </audio>
 
