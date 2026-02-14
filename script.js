@@ -7,16 +7,17 @@ const messages = [
   {
   preview: "you miss my voice",
   text: `
-    Press play, my love.
+    im with you always
     <br><br>
 
     <audio controls style="width: 100%; margin-top: 10px;">
   <source src="youmissmyvoice.m4a" type="audio/mp4">
-
-    </audio>
+  <source src="youmissmyvoice.m4a" type="audio/x-m4a">
+  Your browser does not support audio.
+</audio>
 
     <br><br>
-    Close your eyes and think of me 💗
+    yappidy yap yap yap
   `
 },
  {
@@ -48,7 +49,7 @@ const messages = [
   {
     preview: "If I'm not responding but u miss me",
     text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
-  },
+  }
 ];
 
 /* ================= DOM ================= */
@@ -340,6 +341,11 @@ modal.addEventListener("click", (e) => {
 
 function closeModalFn() {
   modal.classList.add("hidden");
+  modalText.querySelectorAll("audio").forEach(a => {
+  a.pause();
+  a.currentTime = 0;
+});
+  
   modalText.innerHTML = "";
 
   if (lastOpenedPaper) {
