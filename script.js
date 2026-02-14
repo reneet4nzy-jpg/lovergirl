@@ -4,24 +4,38 @@ let spilled = false;
 let lastOpenedPaper = null;
 
 const messages = [
-  "You are my favourite hello and my hardest goodbye.",
+  {
+  preview: "you miss my voice",
+  text: `
+    Press play, my love.
+    <br><br>
+
+    <audio controls style="width: 100%; margin-top: 10px;">
+      <source src="youmissmyvoice.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <br><br>
+    Close your eyes and think of me 💗
+  `
+},
  {
   preview: "someone paused the music on your life",
   text: `
-    need some music to get the vibes right?
+    need some music to get the vibes right? heres a playlist of the daily songs hehe
     <br><br>
     <a href="https://open.spotify.com/playlist/5nZUJj0xljpS5s5ePFDckg?si=4b45bc1df3cb457e" target="_blank">
-      a playlist of the daily songs hehe
+      Cue the music!
     </a>
   `
 },
 {
   preview: "You need to know how much I love you",
   text: `
-    You need to know how much I love you.
+    The pinterest board I didnt let you see before. Go take a look? insert smiley hands clasped hampter
     <br><br>
     <a href="https://pin.it/5gFCIbj5K" target="_blank">
-      The pinterest board I didnt let you see before. Go take a look? insert smiley hands clasped hampter
+      i love you
     </a>
   `
 },
