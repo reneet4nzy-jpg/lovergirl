@@ -41,7 +41,7 @@ body::before{
   inset: var(--frame-inset);
   padding: var(--frame-pad-top) var(--frame-pad) var(--frame-pad);
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 
   display:flex;
   justify-content:center;
