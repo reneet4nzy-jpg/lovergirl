@@ -4,20 +4,32 @@ let spilled = false;
 let lastOpenedPaper = null;
 
 const messages = [
+   {
+  preview: "you miss my AWESOME singing",
+  text: `
+    </p>hey there miguel whats it liek in tekong camp im 22km away but man tonight you look so pretty yes you do, orchard cant shine half as bright as u my word is true. 
+    \nhey there migugu dont you worry about the distance im right here if you get lonely give this sog another listen close your eyes. listen to my voice its my disguise, im by your side.</p>
+
+    <audio controls style="width: 100%; margin-top: 10px;">
+  <source src="hey there delilah.m4a" type="audio/mp4">
+  <source src="heytheredelilah.m4a" type="audio/x-m4a">
+  Your browser does not support audio.
+</audio>
+
+    </p>dont judge my singing i recorded this mid coding</p>
+  `
+},
   {
   preview: "you miss my voice",
   text: `
-    im with you always
-    <br><br>
-
+    </p>im with you always</p>
     <audio controls style="width: 100%; margin-top: 10px;">
   <source src="youmissmyvoice.m4a" type="audio/mp4">
   <source src="youmissmyvoice.m4a" type="audio/x-m4a">
   Your browser does not support audio.
 </audio>
 
-    <br><br>
-    yappidy yap yap yap
+    </p>yappidy yap yap yap</p>
   `
 },
  {
