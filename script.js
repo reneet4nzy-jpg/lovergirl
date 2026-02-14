@@ -5,7 +5,16 @@ let lastOpenedPaper = null;
 
 const messages = [
   "You are my favourite hello and my hardest goodbye.",
-  "I love the way your eyes soften when you smile.",
+ {
+  preview: "someone paused the music on your life",
+  text: `
+    need some music to get the vibes right?
+    <br><br>
+    <a href="https://open.spotify.com/playlist/5nZUJj0xljpS5s5ePFDckg?si=4b45bc1df3cb457e" target="_blank">
+      a playlist of the daily songs hehe
+    </a>
+  `
+},
 {
   preview: "You need to know how much I love you",
   text: `
@@ -26,8 +35,6 @@ const messages = [
     preview: "If I'm not responding but u miss me",
     text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
   },
-
-  "Your laugh is my favourite sound."
 ];
 
 /* ================= DOM ================= */
@@ -309,6 +316,22 @@ function openMessage(message, paperEl) {
   }
 
   modal.classList.remove("hidden");
+}
+
+closeModal.addEventListener("click", closeModalFn);
+
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) closeModalFn();
+});
+
+function closeModalFn() {
+  modal.classList.add("hidden");
+  modalText.innerHTML = "";
+
+  if (lastOpenedPaper) {
+    lastOpenedPaper.classList.remove("opened");
+    lastOpenedPaper.style.opacity = 1;
+  }
 }
 /* ================= UTILS ================= */
 
