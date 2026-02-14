@@ -5,6 +5,10 @@ let lastOpenedPaper = null;
 
 const messages = [
    {
+    preview: "If I'm not responding but u miss me",
+    text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
+  },
+   {
   preview: "you miss my AWESOME singing",
   text: `
     <p>hey there miguel whats it liek in tekong camp im 22km away but man tonight you look so pretty yes you do, orchard cant shine half as bright as u my word is true.\nhey there migugu dont you worry about the distance im right here if you get lonely give this sog another listen close your eyes. listen to my voice its my disguise, im by your side.\ndont judge my singing i recorded this mid coding</p>
@@ -54,11 +58,6 @@ const messages = [
     preview: "You need a kiss",
     text: "A little kiss for u\nMwah, I love you.",
     img: "kisses.jpg"
-  },
-
-  {
-    preview: "If I'm not responding but u miss me",
-    text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
   }
 ];
 
