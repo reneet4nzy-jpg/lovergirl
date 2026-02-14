@@ -7,9 +7,15 @@ const messages = [
   "You are my favourite hello and my hardest goodbye.",
   "I love the way your eyes soften when you smile.",
 {
-    preview: "You need to know how much i love you",
-    text: "remember that i love you so much that wed be immortalised as constellations after we die because of how much i love you. death shall not do us part because i love you so. \n\njust as orpheus loved eurydice, i shall steal a glance at the man i love with every bit of me, exam or not."
-  },
+  preview: "You need to know how much I love you",
+  text: `
+    You need to know how much I love you.
+    <br><br>
+    <a href="https://pin.it/5gFCIbj5K" target="_blank">
+      The pinterest board I didnt let you see before. Go take a look? insert smiley hands clasped hampter
+    </a>
+  `
+},
   {
     preview: "You need a kiss",
     text: "A little kiss for u\nMwah, I love you.",
@@ -286,7 +292,7 @@ function openMessage(message, paperEl) {
   if (typeof message === "object") {
     // text
     const textEl = document.createElement("div");
-    textEl.textContent = message.text || "";
+    textEl.innerHTML = message.text; || "";
     modalText.appendChild(textEl);
 
     // optional image
