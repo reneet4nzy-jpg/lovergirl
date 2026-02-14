@@ -23,7 +23,7 @@ body{
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background:#faf7ff;
 }
-
+body{ overflow-y: auto; }
 /* decorative frame overlay */
 body::before{
   content:"";
@@ -305,21 +305,39 @@ body::before{
 }
 .openWhenTitle.show{ opacity:1; }
 
-/* ===== Phone fix: make the opened letter scrollable ===== */
+/* ===== Phone fix: make the opened letter scrollable (iPhone-safe) ===== */
 @media (max-width: 520px){
+
+  /* let the overlay scroll */
+  .modal{
+    align-items: flex-start;     /* stop centering */
+    justify-content: center;
+    overflow-y: auto;            /* the overlay scrolls */
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 0;             /* space top/bottom */
+  }
+
+  /* card becomes a normal scrolling box */
   .card{
-    width: min(92vw, 720px);
-    max-height: 85vh;          /* keep it inside the screen */
-    overflow: auto;            /* allow scrolling inside the letter */
+    width: 92vw;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
-    padding: 26px 22px;        /* smaller padding so more fits */
-    background-size: 100% 100%;
+    padding: 26px 22px;
+
+    /* IMPORTANT: transforms break scroll on iPhone */
+    transform: none !important;
+  }
+
+  /* also disable the opening transform animation */
+  .modal:not(.hidden) .card{
+    transform: none !important;
   }
 
   .modalText{
     max-width: 100%;
-    font-size: 18px;           /* smaller text so it fits nicer */
+    font-size: 18px;
     line-height: 1.45;
   }
 
@@ -329,7 +347,6 @@ body::before{
     font-size: 20px;
   }
 
-  /* audio should not overflow */
   .noteAudio{
     width: 100%;
     display: block;
