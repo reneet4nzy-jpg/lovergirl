@@ -37,11 +37,11 @@ const messages = [
  {
   preview: "someone paused the music on your life",
   text: `
-    need some music to get the vibes right? heres a playlist of the daily songs hehe
-    <br><br>
-    <a href="https://open.spotify.com/playlist/5nZUJj0xljpS5s5ePFDckg?si=4b45bc1df3cb457e" target="_blank">
+    <p>need some music to get the vibes right? heres a playlist of the daily songs hehe</p>
+
+    <p><a href="https://open.spotify.com/playlist/5nZUJj0xljpS5s5ePFDckg?si=4b45bc1df3cb457e" target="_blank" rel="noopener">
       Cue the music!
-    </a>
+    </a></p>
   `
 },
 {
