@@ -48,9 +48,8 @@ const messages = [
   preview: "You need to know how much I love you",
   text: `
     The pinterest board I didnt let you see before. Go take a look? insert smiley hands clasped hampter
-    <br><br>
-    <a href="https://pin.it/5gFCIbj5K" target="_blank">
-      i love you
+    <a href="https://docs.google.com/document/d/1nDylkNBM5skx9_QUa7gRSe1ndXSaihFN5Cc22zUaohA/edit?usp=sharing" target="_blank">
+      temporary google doc replacement
     </a>
   `
 },
@@ -58,7 +57,12 @@ const messages = [
     preview: "You need a kiss",
     text: "A little kiss for u\nMwah, I love you.",
     img: "kisses.jpg"
-  }
+  },
+   
+   {
+    preview: "You angered me and dk what to do",
+    text: "i know sometimes i over-flip out so you can fall back on this foolproof plan:\nstep 1, transfer me 10000 dollars\nstep 2, send sugary delights to my place\nstep 3, show up at my door and ask me to seesaw, perhaps with flowers(only if i havent received any recently)\nstep 5, beg on your knees. and done!\n baby dont worry itll all blow over easily. well get past this okay? give it time. i love you, no matter what nonsense angry me said. you know me, you know how to handle me. good luck!"
+  },
 ];
 
 /* ================= DOM ================= */
