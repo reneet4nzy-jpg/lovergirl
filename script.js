@@ -1,4 +1,4 @@
-const PASSWORD = "yourconstellationnowandforever";
+const PASSWORD = "031630060722";
 
 let spilled = false;
 let lastOpenedPaper = null;
@@ -119,6 +119,10 @@ mwah
 
   `
 }
+    {
+    preview: "you feel like a 'horrible person",
+    text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
+  }
 ];
 
 /* ================= DOM ================= */
@@ -149,7 +153,7 @@ enterBtn.addEventListener("click", () => {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "typo perchance? insert sad hampter";
+    gateMsg.textContent = "WRONG!! skill issue UNDERGOING MAINTENANCE. Good things come to those who wait, have patience.";
   }
 });
 
