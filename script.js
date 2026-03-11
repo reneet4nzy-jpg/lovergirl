@@ -1,4 +1,4 @@
-const PASSWORD = "031630060722";
+const PASSWORD = "yourconstellationnowandforever";
 
 let spilled = false;
 let lastOpenedPaper = null;
@@ -89,8 +89,7 @@ mwah
 
    {
     preview: "You feel like a bad bf/like i deserve better",
-    text: "I know how you feel but just know ive never loved one like you. If you want to be better for me thats great but it doesnt make you a bad bf now. if you think i can do better youre wrong you ARE better. youre better for me than you were yesterday and tomorrow you will be better than today. current you will always be the best for me because you are someone who always improves day by day for me, and i love it. the fact that youre worried about being a bad bf shows u care that alone makes u a great bf. You mess up sometimes as do i and thats what it means to be human. i love you as you are."
-  },
+    text: "I know how you feel but just know ive never loved anyone like you. If you want to be better for me thats great but it doesnt make you a bad bf now. if you think i deserve better youre wrong, you ARE better. youre better for me than you were yesterday and tomorrow you will be better than today. current you will always be the best for me because you are someone who always improves day by day for me, and i love that about you. the fact that youre worried about being a bad bf shows u care that alone makes u a great bf. You mess up sometimes as do i and thats what it means to be human, and i dont think having human traits is a bad thing at all. i love you as you are."
 
     {
     preview: "You feel yourself losing feelings",
@@ -121,7 +120,8 @@ mwah
 }
     {
     preview: "you feel like a 'horrible person",
-    text: "Hii babyy I’m sorryy I must be busy for you to be here, but scroll around here until I’m back?\n\nI put little bits of me in all of these, so this might as well count as my presence.\n\nEnjoy scrolling my love."
+    text: "youre not a terrible person/n/nin fact youre a wonderful person. i think you dont understand just how wonderful you are. youre full of love, laughter, joy, humour and more. I know you think youve messed up and youre a horrible person and whatnot but the thing is, you will mess up here and there but you'll learn, youll change, youll grow. Everyone makes mistakes. youre still learning. youre human too, in fact youre not even halfway through life plenty of time to grow baby. We still have the rest of our lives to learn! dont blame yourself so much because it doesn't matter as much as you think it does right now. Plus you couldve turned out so much worse dont you think?
+"
   }
 ];
 
@@ -153,7 +153,7 @@ enterBtn.addEventListener("click", () => {
     gate.classList.add("hidden");
     app.classList.remove("hidden");
   } else {
-    gateMsg.textContent = "WRONG!! skill issue UNDERGOING MAINTENANCE. Good things come to those who wait, have patience.";
+    gateMsg.textContent = "typo perchance? insert sad hampter";
   }
 });
 
