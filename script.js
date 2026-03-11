@@ -119,7 +119,7 @@ mwah
   `
 },
     {
-    preview: "you feel like a 'horrible person",
+    preview: "you feel like a 'horrible person' ",
     text: "youre not a terrible person\nin fact youre a wonderful person. i think you dont understand just how wonderful you are. youre full of love, laughter, joy, humour and more. I know you think youve messed up and youre a horrible person and whatnot but the thing is, you will mess up here and there but you'll learn, youll change, youll grow. Everyone makes mistakes. youre still learning. youre human too, in fact youre not even halfway through life plenty of time to grow baby. We still have the rest of our lives to learn! dont blame yourself so much because it doesn't matter as much as you think it does right now. Plus you couldve turned out so much worse dont you think?
 "
   }
