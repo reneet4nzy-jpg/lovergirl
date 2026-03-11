@@ -90,7 +90,7 @@ mwah
    {
     preview: "You feel like a bad bf/like i deserve better",
     text: "I know how you feel but just know ive never loved anyone like you. If you want to be better for me thats great but it doesnt make you a bad bf now. if you think i deserve better youre wrong, you ARE better. youre better for me than you were yesterday and tomorrow you will be better than today. current you will always be the best for me because you are someone who always improves day by day for me, and i love that about you. the fact that youre worried about being a bad bf shows u care that alone makes u a great bf. You mess up sometimes as do i and thats what it means to be human, and i dont think having human traits is a bad thing at all. i love you as you are."
-
+   }
     {
     preview: "You feel yourself losing feelings",
     text: "how dare you open this. Insert angry fist up emoji.\nso this is just in case, im praying you dont ever find a reason to open it but anyways just talk to me about it. like right now. we will figure out where to go from here or how to fix it. remember that i will always love you, even if you no longer love me. Jeez im crying as i write this i dont wanna think about it:("
@@ -117,7 +117,7 @@ mwah
     can u tell im running out of things to include
 
   `
-}
+},
     {
     preview: "you feel like a 'horrible person",
     text: "youre not a terrible person/n/nin fact youre a wonderful person. i think you dont understand just how wonderful you are. youre full of love, laughter, joy, humour and more. I know you think youve messed up and youre a horrible person and whatnot but the thing is, you will mess up here and there but you'll learn, youll change, youll grow. Everyone makes mistakes. youre still learning. youre human too, in fact youre not even halfway through life plenty of time to grow baby. We still have the rest of our lives to learn! dont blame yourself so much because it doesn't matter as much as you think it does right now. Plus you couldve turned out so much worse dont you think?
